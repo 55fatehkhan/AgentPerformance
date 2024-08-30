@@ -1,0 +1,220 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './FilePerformance.css';
+import { Box, Typography, CircularProgress, Card, CardContent, Button,  } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+
+const FilePerformance = () => {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        navigate('/');
+    };
+
+    const [filters, setFilters] = useState({
+        fromDate: '',
+        toDate: '',
+        dataset: '',
+        center: '',
+        dialer: '',
+        datatype: '',
+        campaign: ''
+    });
+
+    const [data, setData] = useState([]);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false); // Loading state
+
+    const handleChange = (e) => {
+        setFilters({
+            ...filters,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSubmit = async () => {
+        if (!filters.fromDate || !filters.toDate) {
+            alert('Please select both From Date and To Date.');
+            return;
+        }
+
+        // Calculate the difference in days between From Date and To Date
+    const fromDate = new Date(filters.fromDate);
+    const toDate = new Date(filters.toDate);
+    const timeDifference = toDate.getTime() - fromDate.getTime();
+    const dayDifference = timeDifference / (1000 * 3600 * 24);
+
+    // Check if the gap is more than 7 days
+    if (dayDifference > 7) {
+        alert('Please choose a date range within 7 days.');
+        return;
+    }
+
+        if (!filters.center) {
+            alert('Please select Center');
+            return;
+        }   
+        if (!filters.dialer || !filters.campaign) {
+            alert('Please select Dialer and Campaign');
+            return;
+        }
+
+        try {
+            setLoading(true); // Start loading
+            const response = await fetch('http://localhost:5000/api/filePerformance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(filters)
+            });
+            const result = await response.json();
+            setData(result);
+            setIsSubmitted(true);
+        } catch (error) {
+            console.error('Error fetching data', error);
+        }finally {
+            setLoading(false); // End loading
+        }
+    };
+
+    const convertToCSV = (arr) => {
+        const array = [Object.keys(arr[0])].concat(arr);
+        return array.map(it => {
+            return Object.values(it).join(',');
+        }).join('\n');
+    };
+
+    const downloadCSV = () => {
+        const csv = convertToCSV(data);
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'file_performance_data.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const columns = [
+        { field: 'listId', headerName: 'List ID', width: 150 },
+       // { field: 'file', headerName: 'File', width: 150 },
+        { field: 'dataset', headerName: 'Dataset', width: 150 },
+        { field: 'phoneCount', headerName: 'Phone Count', width: 150 },
+        { field: 'humanCount', headerName: 'Human Count', width: 150 },
+        { field: 'nonHumanCount', headerName: 'Non-Human Count', width: 150 },
+        { field: 'attemptsCount', headerName: 'Attempts Count', width: 150 },
+        { field: 'paidCount', headerName: 'Paid Count', width: 150 },
+        { field: 'HA', headerName: 'HA (%)', width: 150 },
+        { field: 'NonHA', headerName: 'Non-HA (%)', width: 150 }
+    ];
+
+    return (
+        <div className="fileperformance-container">
+            <header className="fileperformance-header">
+                <h1>File Performance Dashboard</h1>
+                <div className="user-info">
+                    <button className="logout-btn" onClick={handleLogout}>Logout 🔒</button>
+                </div>
+            </header>
+
+            <div className="filter-section">
+                <h3>Filters</h3>
+                <div className="filter-row">
+                    <div className="filter-field">
+                        <label htmlFor="fromDate">From Date:</label>
+                        <input type="date" id="fromDate" name="fromDate" value={filters.fromDate} onChange={handleChange} />
+                    </div>
+                    <div className="filter-field">
+                        <label htmlFor="toDate">To Date:</label>
+                        <input type="date" id="toDate" name="toDate" value={filters.toDate} onChange={handleChange} />
+                    </div>
+                    <div className="filter-field">
+                        <label htmlFor="center">Center:</label>
+                        <select name="center" id="center" value={filters.center} onChange={handleChange}>
+                            <option value="">Center</option>
+                            <option value="SHARK">Shark</option>
+                            <option value="FORTUNE">Fortune</option>
+                        </select>
+                    </div>
+                    <div className="filter-field">
+                        <label htmlFor="dialer">Dialer:</label>
+                        <select name="dialer" id="dialer" value={filters.dialer} onChange={handleChange}>
+                            <option value="">Dialer</option>                           
+                            <option value="Telcast">Telcast</option>
+                            <option value="Phdialer">Phdialer</option>
+                            <option value="Both">Both</option>
+                        </select>
+                    </div>
+                    <div className="filter-field">
+                        <label htmlFor="campaign">Campaign:</label>
+                        <select name="campaign" id="campaign" value={filters.campaign} onChange={handleChange}>
+                            <option value="">Campaign</option>                           
+                            <option value="Outbound">Outbound</option>
+                            <option value="Inbound">Inbound</option>
+                            <option value="Both">Both</option>
+                        </select>
+                    </div>
+                    <div className="filter-field">
+                        <label htmlFor="dataset">Dataset:</label>
+                        <select name="dataset" id="dataset" value={filters.dataset} onChange={handleChange}>
+                            <option value="">Dataset</option>
+                            <option value="1">Dataset 1</option>
+                            <option value="2">Dataset 2</option>
+                            <option value="3">Dataset 3</option>
+                        </select>
+                    </div>
+                    <div className="filter-field">
+                        <label htmlFor="datatype">Data Type:</label>
+                        <select name="datatype" id="datatype" value={filters.datatype} onChange={handleChange}>
+                            <option value="">Data Type</option>
+                            <option value="All">All</option>
+                            <option value="Danish">Danish</option>
+                            <option value="Jared">Jared</option>
+                        </select>
+                    </div>
+                    <div className="filter-actions">
+                        <button className="submit-btn" onClick={handleSubmit}>Submit</button>
+                        <button className="reset-btn" onClick={() => setFilters({ fromDate: '', toDate: '', dataset: '', center: '', dialer: '', datatype: '', campaign: '' })}>Reset</button>
+                    </div>
+                </div>
+            </div>
+
+
+              {/* Loading Spinner */}
+              {loading && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
+                    <CircularProgress />
+                    <Typography variant="body1" sx={{ ml: 2 }}>Data is large, fetching, please wait...</Typography>
+                </Box>
+            )}
+
+            {isSubmitted && !loading && data.length > 0 && (
+                <Card>
+                    <CardContent>
+                    <Button 
+                            variant="contained" 
+                            color="primary" 
+                            style={{ marginTop: '5px', marginBottom: '15px' }} 
+                            onClick={downloadCSV}>
+                            Download CSV
+                        </Button>
+                    <div style={{ height: 400, width: '100%' }}>
+                        <DataGrid
+                            rows={data}
+                            columns={columns}
+                            pageSize={10}
+                            rowsPerPageOptions={[10, 20, 50]}
+                            checkboxSelection
+                            disableSelectionOnClick
+                            getRowId={(row) => `${row.listId}-${row.dataset}`}
+                        />
+                    </div>
+                    </CardContent>
+                    </Card>
+            )}
+        </div>
+    );
+};
+
+export default FilePerformance;
