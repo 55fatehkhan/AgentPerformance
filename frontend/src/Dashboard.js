@@ -53,7 +53,7 @@ const Dashboard = () => {
 
         try {
             setLoading(true); // Start loading
-            const response = await fetch('http://localhost:5000/api/agentPerformance', {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/agentPerformance`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
