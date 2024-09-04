@@ -151,6 +151,7 @@ const RuntimePerformance = () => {
                             {Loggedin_centerName === 'both' && <option value="">Select Center</option>}
                             {Loggedin_centerName === 'both' && <option value="SHARK">Shark</option>}
                             {Loggedin_centerName === 'both' && <option value="FORTUNE">Fortune</option>}
+                            {Loggedin_centerName === 'both' && <option value="Both">Both</option>}
 
                             {Loggedin_centerName === 'SHARK' && <option value="">Select Center</option>}
                             {Loggedin_centerName === 'SHARK' && <option value="SHARK">Shark</option>}

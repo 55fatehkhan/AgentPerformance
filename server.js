@@ -100,12 +100,30 @@ app.post('/api/runtimeperformance', async (req, res) => {
     const { centerName, provider, fromDate, toDate } = req.body;
 
     // console.log('Received Runtime filters:', { fromDate, toDate, centerName, provider });
+
+    //centerName match condition
+    let centerNameMatch;
+    if (centerName === "Both") {
+        centerNameMatch = { $in: ["SHARK", "FORTUNE"] };
+    } else {
+        centerNameMatch = centerName;
+    }
+
+    //provider match condition
+    let providerMatch;
+    if (provider === "Both") {
+        providerMatch = { $in: ["Telcast", "Phdialer"] };
+    } else {
+        providerMatch = provider;
+    }
+
+
     try {
         const aggregationPipeline = [
             {
                 $match: {
-                    centerName,
-                    provider,
+                    centerName: centerNameMatch,
+                    provider: providerMatch,
                     dialedAt: {
                         $gte: new Date(fromDate),
                         $lt: new Date(toDate)
@@ -162,6 +180,14 @@ app.post('/api/agentPerformance', async (req, res) => {
                 } else if (campaign === 'Both') {
                     return ["HW", "HW_2", "CallerID", "INBOUNDH", "HWXFER"];
                 }
+            } else if (dialer === 'Both') {
+                if (campaign === 'Outbound') {
+                    return ["SH_HWG", "SH_HWG2", "HW", "HW_2"];
+                } else if (campaign === 'Inbound') {
+                    return ["SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "CallerID", "INBOUNDH", "HWXFER"];
+                } else if (campaign === 'Both') {
+                    return ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "HW", "HW_2", "CallerID", "INBOUNDH", "HWXFER"];
+                }
             }
         } else if (center === 'FORTUNE') {
             if (dialer === 'Telcast') {
@@ -175,6 +201,7 @@ app.post('/api/agentPerformance', async (req, res) => {
             }
         }
     };
+    
     
     const campaignIds = getCampaignIds();
     // console.log('Received Filters:', { fromDate, toDate, campaignIds, center, dialer });
@@ -195,15 +222,25 @@ app.post('/api/agentPerformance', async (req, res) => {
     }
 
     if (center) {
-        matchCondition.centerName = center;
+        if (center === 'Both') {
+            matchCondition.centerName = { $in: ["SHARK", "FORTUNE"] };
+        } else {
+            matchCondition.centerName = center;
+        }
     }
 
     if (dialer) {
-        matchCondition.provider = dialer;
+        if (dialer === 'Both') {
+            matchCondition.provider = { $in: ["Telcast", "Phdialer"] };
+        } else if (dialer === 'Telcast') {
+            matchCondition.provider = { $in: ["Telcast"] };
+        } else if (dialer === 'Phdialer') {
+            matchCondition.provider = { $in: ["Phdialer"] };
+        }
     }
 
     // Debug
-     // console.log('Match Condition:', matchCondition);
+    console.log('Match Condition:', matchCondition);
 
     try {
         const aggregationPipeline = [
