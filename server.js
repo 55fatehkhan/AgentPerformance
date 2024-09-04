@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 
 
 const app = express();
@@ -16,6 +17,25 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .catch(err => console.log(err));
 
 mongoose.set("debug", true);    
+
+// User schema and model
+const userSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, required: true },
+    center: { type: String, required: true }
+});
+
+const User = mongoose.model('user', userSchema);
+
+const runtimeSchema = new mongoose.Schema({
+    dialedAt: Date,
+    campaignId: String,
+    centerName: String, 
+    provider: String   
+});
+
+const RuntimeReport = mongoose.model('runtimelog', runtimeSchema);
 
 const reportSchema = new mongoose.Schema({
     agentName: String,
@@ -43,6 +63,82 @@ const threeWaySchema = new mongoose.Schema({
     duration: Number
 });
 const ThreeWayReport = mongoose.model('threewayreport', threeWaySchema);
+
+
+// Login endpoint
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    // console.log("Username:  ", username);
+    // console.log("Pass:  ", password);
+    try {
+        const user = await User.findOne({ username });
+
+        if (user && user.password === password) {
+            res.json({ success: true, role: user.role, center: user.center });
+        } else {
+            res.status(401).json({ success: false, message: 'Invalid username or password' });
+        }
+    } catch (error) {
+        console.error("Error during login: ", error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+// Logout endpoint
+// app.post('/api/logout', (req, res) => {
+//     req.session.destroy(err => {
+//         if (err) {
+//             return res.status(500).json({ success: false, message: 'Failed to log out' });
+//         }
+//         res.json({ success: true });
+//     });
+// });
+
+// Runtime Performance endpoint
+app.post('/api/runtimeperformance', async (req, res) => {
+    const { centerName, provider, fromDate, toDate } = req.body;
+
+    // console.log('Received Runtime filters:', { fromDate, toDate, centerName, provider });
+    try {
+        const aggregationPipeline = [
+            {
+                $match: {
+                    centerName,
+                    provider,
+                    dialedAt: {
+                        $gte: new Date(fromDate),
+                        $lt: new Date(toDate)
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    dialedAt: 1,
+                    dataset: 1,
+                    listId: 1,
+                    file: 1,
+                    totalNumberDial: 1,
+                    humanAnswerCount: 1,
+                    HAPercent: 1,
+                    SaleCount: 1,
+                    totalCountsOfFile: 1,
+                    centerName: 1,
+                    provider: 1
+                }
+            }
+        ];
+
+        const results = await RuntimeReport.aggregate(aggregationPipeline);
+        res.json(results);
+    } catch (error) {
+        console.error("Error fetching runtime performance data: ", error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
+
 
 //AGENT PERFORMANCE
 app.post('/api/agentPerformance', async (req, res) => {
@@ -334,7 +430,7 @@ app.post('/api/agentPerformance', async (req, res) => {
 app.post('/api/filePerformance', async (req, res) => {
     const { fromDate, toDate, center, dialer, campaign } = req.body;
 
-    console.log('Received input(fileperformance):  ', req.body);
+    // console.log('Received input(fileperformance):  ', req.body);
     const fromDateObj = new Date(fromDate).toISOString().split('T')[0];
     const toDateObj = new Date(toDate).toISOString().split('T')[0];
 

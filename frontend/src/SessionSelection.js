@@ -10,7 +10,11 @@ const SessionSelection = () => {
     };
 
     const goToFilePerformance = () => {
-        navigate('/FilePerformance'); // This will be the new page you will work on later
+        navigate('/FilePerformance'); 
+    };
+
+    const goToRuntimeAnalysis = () => {
+        navigate('/RuntimePerformance'); 
     };
 
     return (
@@ -24,6 +28,10 @@ const SessionSelection = () => {
                 <div className="card" onClick={goToFilePerformance}>
                     <h2>Files Performance Section</h2>
                     <p>Analyse and manage file performance data.</p>
+                </div>
+                <div className="card" onClick={goToRuntimeAnalysis}>
+                    <h2>Runtime Analysis Section</h2>
+                    <p>Analyse the files, how they perform on each run</p>
                 </div>
             </div>
         </div>

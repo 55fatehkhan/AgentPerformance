@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './FilePerformance.css';
 import { Box, Typography, CircularProgress, Card, CardContent, Button,  } from '@mui/material';
@@ -6,10 +6,31 @@ import { DataGrid } from '@mui/x-data-grid';
 
 const FilePerformance = () => {
     const navigate = useNavigate();
-
+    
     const handleLogout = () => {
         navigate('/');
     };
+    // const handleLogout = async () => {
+    //     try {
+    //         const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/logout`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         });
+
+    //         const data = await response.json();
+
+    //         if (data.success) {
+    //             navigate('/'); 
+    //         } else {
+    //             alert('Failed to log out');
+    //         }
+    //     } catch (error) {
+    //         console.error('Logout error:', error);
+    //         alert('An error occurred during logout.');
+    //     }
+    // };
 
     const [filters, setFilters] = useState({
         fromDate: '',
@@ -21,9 +42,23 @@ const FilePerformance = () => {
         campaign: ''
     });
 
+    const Loggedin_centerName = sessionStorage.getItem('centerName');
+    // const Loggedin_role = sessionStorage.getItem('role');
+
+   // console.log(Loggedin_centerName, Loggedin_role);
+
     const [data, setData] = useState([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [loading, setLoading] = useState(false); // Loading state
+
+    useEffect(() => {
+        if (Loggedin_centerName) {
+            setFilters((prevFilters) => ({
+                ...prevFilters,
+                center: Loggedin_centerName
+            }));
+        }
+    }, [Loggedin_centerName]);
 
     const handleChange = (e) => {
         setFilters({
@@ -131,19 +166,33 @@ const FilePerformance = () => {
                     </div>
                     <div className="filter-field">
                         <label htmlFor="center">Center:</label>
-                        <select name="center" id="center" value={filters.center} onChange={handleChange}>
-                            <option value="">Center</option>
-                            <option value="SHARK">Shark</option>
-                            <option value="FORTUNE">Fortune</option>
+                        <select name="center" id="center" value={filters.center} onChange={handleChange} >
+                            {Loggedin_centerName === 'both' && <option value="">Center</option>}
+                            {Loggedin_centerName === 'both' && <option value="SHARK">Shark</option>}
+                            {Loggedin_centerName === 'both' && <option value="FORTUNE">Fortune</option>}
+
+                            {Loggedin_centerName === 'SHARK' && <option value="">Center</option>}
+                            {Loggedin_centerName === 'SHARK' && <option value="SHARK">Shark</option>}
+
+                            {Loggedin_centerName === 'FORTUNE' && <option value="">Center</option>}
+                            {Loggedin_centerName === 'FORTUNE' && <option value="FORTUNE">Fortune</option>}
                         </select>
                     </div>
                     <div className="filter-field">
                         <label htmlFor="dialer">Dialer:</label>
                         <select name="dialer" id="dialer" value={filters.dialer} onChange={handleChange}>
-                            <option value="">Dialer</option>                           
-                            <option value="Telcast">Telcast</option>
-                            <option value="Phdialer">Phdialer</option>
-                            <option value="Both">Both</option>
+                        {Loggedin_centerName === 'both' && <option value="">Dialer</option>}
+                            {Loggedin_centerName === 'both' && <option value="Telcast">Telcast</option>}
+                            {Loggedin_centerName === 'both' && <option value="Phdialer">Phdialer</option>}
+                            {Loggedin_centerName === 'both' && <option value="Both">Both</option>}
+
+                            {Loggedin_centerName === 'SHARK' && <option value="">Dialer</option>}
+                            {Loggedin_centerName === 'SHARK' && <option value="Telcast">Telcast</option>}
+                            {Loggedin_centerName === 'SHARK' && <option value="Phdialer">Phdialer</option>}
+                            {Loggedin_centerName === 'SHARK' && <option value="Both">Both</option>}
+
+                            {Loggedin_centerName === 'FORTUNE' && <option value="">Dialer</option>}
+                            {Loggedin_centerName === 'FORTUNE' && <option value="Telcast">Telcast</option>}
                         </select>
                     </div>
                     <div className="filter-field">
@@ -155,7 +204,7 @@ const FilePerformance = () => {
                             <option value="Both">Both</option>
                         </select>
                     </div>
-                    <div className="filter-field">
+                    {/* <div className="filter-field">
                         <label htmlFor="dataset">Dataset:</label>
                         <select name="dataset" id="dataset" value={filters.dataset} onChange={handleChange}>
                             <option value="">Dataset</option>
@@ -172,7 +221,7 @@ const FilePerformance = () => {
                             <option value="Danish">Danish</option>
                             <option value="Jared">Jared</option>
                         </select>
-                    </div>
+                    </div> */}
                     <div className="filter-actions">
                         <button className="submit-btn" onClick={handleSubmit}>Submit</button>
                         <button className="reset-btn" onClick={() => setFilters({ fromDate: '', toDate: '', dataset: '', center: '', dialer: '', datatype: '', campaign: '' })}>Reset</button>

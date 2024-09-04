@@ -8,31 +8,50 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
-    const users = {
-        Faiyaz: {
-            password: 'faiyazstl@123',
-            role: 'admin',
-            center: 'both'
-        },
-        Shark: {
-            password: 'sharkstl@123',
-            role: 'user',
-            center: 'SHARK'
-        },
-        Fortune: {
-            password: 'fortunestl@123',
-            role: 'user',
-            center: 'FORTUNE'
-        }
-    };
+    // const users = {
+    //     Faiyaz: {
+    //         password: 'faiyazstl@123',
+    //         role: 'admin',
+    //         center: 'both'
+    //     },
+    //     Shark: {
+    //         password: 'sharkstl@123',
+    //         role: 'user',
+    //         center: 'SHARK'
+    //     },
+    //     Fortune: {
+    //         password: 'fortunestl@123',
+    //         role: 'user',
+    //         center: 'FORTUNE'
+    //     }
+    // };
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
 
-        if (users[username] && users[username].password === password) {
-            navigate('/SessionSelection', { state: { username, role: users[username].role, center: users[username].center } });
-        } else {
-            alert('Invalid username or password');
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // Store center and role in session storage
+                sessionStorage.setItem('centerName', data.center);
+                sessionStorage.setItem('role', data.role);
+                
+                navigate('/SessionSelection', { state: { username, role: data.role, center: data.center } });
+            } else {
+                alert('Invalid username or password');
+            }
+        } catch (error) {
+            console.error('Login failed:', error);
+            alert('An error occurred. Please try again.');
         }
     };
 

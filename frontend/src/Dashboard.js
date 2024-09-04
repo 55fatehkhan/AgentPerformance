@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Container, Box, Card, CardContent, Button, Typography, TextField, MenuItem, Select, CircularProgress } from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -22,9 +22,21 @@ const Dashboard = () => {
         dialer: '',
         campaign: ''
     });
+
+    const Loggedin_centerName = sessionStorage.getItem('centerName');
+
     const [data, setData] = useState([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [loading, setLoading] = useState(false); // Loading state
+
+    useEffect(() => {
+        if (Loggedin_centerName) {
+            setFilters((prevFilters) => ({
+                ...prevFilters,
+                center: Loggedin_centerName
+            }));
+        }
+    }, [Loggedin_centerName]);
 
     const handleChange = (e) => {
         setFilters({
@@ -157,9 +169,15 @@ const Dashboard = () => {
                             displayEmpty
                             sx={{ flex: 1, minWidth: 120 }}
                         >
-                            <MenuItem value="">Center</MenuItem>
-                            <MenuItem value="SHARK">SHARK</MenuItem>
-                            <MenuItem value="FORTUNE">FORTUNE</MenuItem>
+                {Loggedin_centerName === 'both' && <MenuItem value="">Center</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="SHARK">SHARK</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="FORTUNE">FORTUNE</MenuItem>}
+
+                {Loggedin_centerName === 'SHARK' && <MenuItem value="">Center</MenuItem>}
+                {Loggedin_centerName === 'SHARK' && <MenuItem value="SHARK">SHARK</MenuItem>}
+
+                {Loggedin_centerName === 'FORTUNE' && <MenuItem value="">Center</MenuItem>}
+                {Loggedin_centerName === 'FORTUNE' && <MenuItem value="FORTUNE">FORTUNE</MenuItem>}
                         </Select>    
                         
                         <Select
@@ -170,9 +188,18 @@ const Dashboard = () => {
                             displayEmpty
                             sx={{ flex: 1, minWidth: 120 }}
                         >
-                            <MenuItem value="">Dialer</MenuItem>
-                            <MenuItem value="Telcast">Telcast</MenuItem>
-                            <MenuItem value="Phdialer">Phdialer</MenuItem>
+                {Loggedin_centerName === 'both' && <MenuItem value="">Dialer</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="Telcast">Telcast</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="Phdialer">Phdialer</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="Both">Both</MenuItem>}
+
+                {Loggedin_centerName === 'SHARK' && <MenuItem value="">Dialer</MenuItem>}
+                {Loggedin_centerName === 'SHARK' && <MenuItem value="Telcast">Telcast</MenuItem>}
+                {Loggedin_centerName === 'SHARK' && <MenuItem value="Phdialer">Phdialer</MenuItem>}
+                {Loggedin_centerName === 'SHARK' && <MenuItem value="Both">Both</MenuItem>}
+
+                {Loggedin_centerName === 'FORTUNE' && <MenuItem value="">Dialer</MenuItem>}
+                {Loggedin_centerName === 'FORTUNE' && <MenuItem value="Telcast">Telcast</MenuItem>}
                         </Select>
                         <Select
                             label="Campaign"
