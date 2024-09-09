@@ -16,6 +16,13 @@ const SessionSelection = () => {
     const goToRuntimeAnalysis = () => {
         navigate('/RuntimePerformance'); 
     };
+    
+    const goToVoipCost = () => {
+        navigate('/VoipCost'); 
+    };
+    const goToClientReport = () => {
+        navigate('/ClientReport'); 
+    };
 
     return (
         <div className="session-selection-container">
@@ -32,6 +39,14 @@ const SessionSelection = () => {
                 <div className="card" onClick={goToRuntimeAnalysis}>
                     <h2>Runtime Analysis Section</h2>
                     <p>Analyse the files, how they perform on each run</p>
+                </div>
+                <div className="card" onClick={goToVoipCost}>
+                    <h2>VoIP Cost</h2>
+                    <p>Check the VoIP Cost</p>
+                </div>
+                <div className="card" onClick={goToClientReport}>
+                    <h2>Client Report</h2>
+                    <p>Client Report analysis and along with how our data performs for client, everything</p>
                 </div>
             </div>
         </div>

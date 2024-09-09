@@ -10,7 +10,6 @@ const Dashboard = () => {
     // const location = useLocation();
     // const { username, role, center} = location.state || {};
 
-
     const handleLogout = () => {
         navigate('/');
     };
@@ -100,9 +99,11 @@ const Dashboard = () => {
         { field: 'Total Calls per Attempts', headerName: 'No of Calls per Attempts', width: 200 },
         { field: 'totalDurationSeconds', headerName: 'TotalDuration(sec)', width: 200 },
         { field: 'totalDurationMinutes', headerName: 'TotalDuration(mint)', width: 200 },
-        { field: 'costPerAgent', headerName: 'COST/Agent', width: 200 },
-        { field: 'costPerPaidLead', headerName: 'Cost/Paid Leads', width: 200 }
-    ];
+        { field: 'HumanAnswerPercentageOutofTotalHA', headerName: 'HA% out of Total HA', width: 200 },
+        { field: 'totalHumanAnswers', headerName: 'TotalHumanAnswer(selected timeframe)', width: 200 },
+        { field: 'totalVoipCost', headerName: 'TotalVoipCost', width: 150 },
+        { field: 'allocatedCost', headerName: 'Cost/Agent(Allocated)', width: 150 }
+    ]; 
 
     const convertToCSV = (arr) => {
         const array = [Object.keys(arr[0])].concat(arr);
@@ -133,10 +134,12 @@ const Dashboard = () => {
                     <button className="logout-btn" onClick={handleLogout}>Logout 🔒</button>
                 </div>
             </header>
-          
 
             <Card sx={{ mb: 3 }}>
                 <CardContent>
+                <Typography variant="h6" gutterBottom>
+                        Agent Performance
+                    </Typography>
                     <Typography variant="h6" gutterBottom>
                         Filter
                     </Typography>
@@ -170,14 +173,14 @@ const Dashboard = () => {
                             sx={{ flex: 1, minWidth: 120 }}
                         >
                 {Loggedin_centerName === 'both' && <MenuItem value="">Center</MenuItem>}
-                {Loggedin_centerName === 'both' && <MenuItem value="SHARK">SHARK</MenuItem>}
-                {Loggedin_centerName === 'both' && <MenuItem value="FORTUNE">FORTUNE</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="Shark">Shark</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="Fortune">Fortune</MenuItem>}
 
-                {Loggedin_centerName === 'SHARK' && <MenuItem value="">Center</MenuItem>}
-                {Loggedin_centerName === 'SHARK' && <MenuItem value="SHARK">SHARK</MenuItem>}
+                {Loggedin_centerName === 'Shark' && <MenuItem value="">Center</MenuItem>}
+                {Loggedin_centerName === 'Shark' && <MenuItem value="Shark">Shark</MenuItem>}
 
-                {Loggedin_centerName === 'FORTUNE' && <MenuItem value="">Center</MenuItem>}
-                {Loggedin_centerName === 'FORTUNE' && <MenuItem value="FORTUNE">FORTUNE</MenuItem>}
+                {Loggedin_centerName === 'Fortune' && <MenuItem value="">Center</MenuItem>}
+                {Loggedin_centerName === 'Fortune' && <MenuItem value="Fortune">Fortune</MenuItem>}
                         </Select>    
                         
                         <Select
@@ -189,17 +192,17 @@ const Dashboard = () => {
                             sx={{ flex: 1, minWidth: 120 }}
                         >
                 {Loggedin_centerName === 'both' && <MenuItem value="">Dialer</MenuItem>}
-                {Loggedin_centerName === 'both' && <MenuItem value="Telcast">Telcast</MenuItem>}
-                {Loggedin_centerName === 'both' && <MenuItem value="Phdialer">Phdialer</MenuItem>}
-                {Loggedin_centerName === 'both' && <MenuItem value="Both">Both</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="telcast">Telcast</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="phdialer">Phdialer</MenuItem>}
+                {/* {Loggedin_centerName === 'both' && <MenuItem value="Both">Both</MenuItem>} */}
 
-                {Loggedin_centerName === 'SHARK' && <MenuItem value="">Dialer</MenuItem>}
-                {Loggedin_centerName === 'SHARK' && <MenuItem value="Telcast">Telcast</MenuItem>}
-                {Loggedin_centerName === 'SHARK' && <MenuItem value="Phdialer">Phdialer</MenuItem>}
-                {Loggedin_centerName === 'SHARK' && <MenuItem value="Both">Both</MenuItem>}
+                {Loggedin_centerName === 'Shark' && <MenuItem value="">Dialer</MenuItem>}
+                {Loggedin_centerName === 'Shark' && <MenuItem value="telcast">Telcast</MenuItem>}
+                {Loggedin_centerName === 'Shark' && <MenuItem value="phdialer">Phdialer</MenuItem>}
+                {/* {Loggedin_centerName === 'Shark' && <MenuItem value="Both">Both</MenuItem>} */}
 
-                {Loggedin_centerName === 'FORTUNE' && <MenuItem value="">Dialer</MenuItem>}
-                {Loggedin_centerName === 'FORTUNE' && <MenuItem value="Telcast">Telcast</MenuItem>}
+                {Loggedin_centerName === 'Fortune' && <MenuItem value="">Dialer</MenuItem>}
+                {Loggedin_centerName === 'Fortune' && <MenuItem value="telcast">Telcast</MenuItem>}
                         </Select>
                         <Select
                             label="Campaign"

@@ -149,15 +149,15 @@ const RuntimePerformance = () => {
         onChange={handleInputChange}
     >
                             {Loggedin_centerName === 'both' && <option value="">Select Center</option>}
-                            {Loggedin_centerName === 'both' && <option value="SHARK">Shark</option>}
-                            {Loggedin_centerName === 'both' && <option value="FORTUNE">Fortune</option>}
+                            {Loggedin_centerName === 'both' && <option value="Shark">Shark</option>}
+                            {Loggedin_centerName === 'both' && <option value="Fortune">Fortune</option>}
                             {Loggedin_centerName === 'both' && <option value="Both">Both</option>}
 
-                            {Loggedin_centerName === 'SHARK' && <option value="">Select Center</option>}
-                            {Loggedin_centerName === 'SHARK' && <option value="SHARK">Shark</option>}
+                            {Loggedin_centerName === 'Shark' && <option value="">Select Center</option>}
+                            {Loggedin_centerName === 'Shark' && <option value="Shark">Shark</option>}
 
-                            {Loggedin_centerName === 'FORTUNE' && <option value="">Select Center</option>}
-                            {Loggedin_centerName === 'FORTUNE' && <option value="FORTUNE">Fortune</option>}
+                            {Loggedin_centerName === 'Fortune' && <option value="">Select Center</option>}
+                            {Loggedin_centerName === 'Fortune' && <option value="Fortune">Fortune</option>}
     </select>
 </div>
 
@@ -170,17 +170,17 @@ const RuntimePerformance = () => {
         onChange={handleInputChange}
     >
                             {Loggedin_centerName === 'both' && <option value="">Dialer</option>}
-                            {Loggedin_centerName === 'both' && <option value="Telcast">Telcast</option>}
-                            {Loggedin_centerName === 'both' && <option value="Phdialer">Phdialer</option>}
+                            {Loggedin_centerName === 'both' && <option value="telcast">Telcast</option>}
+                            {Loggedin_centerName === 'both' && <option value="phdialer">Phdialer</option>}
                             {Loggedin_centerName === 'both' && <option value="Both">Both</option>}
 
-                            {Loggedin_centerName === 'SHARK' && <option value="">Dialer</option>}
-                            {Loggedin_centerName === 'SHARK' && <option value="Telcast">Telcast</option>}
-                            {Loggedin_centerName === 'SHARK' && <option value="Phdialer">Phdialer</option>}
-                            {Loggedin_centerName === 'SHARK' && <option value="Both">Both</option>}
+                            {Loggedin_centerName === 'Shark' && <option value="">Dialer</option>}
+                            {Loggedin_centerName === 'Shark' && <option value="telcast">Telcast</option>}
+                            {Loggedin_centerName === 'Shark' && <option value="phdialer">Phdialer</option>}
+                            {Loggedin_centerName === 'Shark' && <option value="Both">Both</option>}
 
-                            {Loggedin_centerName === 'FORTUNE' && <option value="">Dialer</option>}
-                            {Loggedin_centerName === 'FORTUNE' && <option value="Telcast">Telcast</option>}
+                            {Loggedin_centerName === 'Fortune' && <option value="">Dialer</option>}
+                            {Loggedin_centerName === 'Fortune' && <option value="telcast">Telcast</option>}
     </select>
 </div>
 

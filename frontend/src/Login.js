@@ -15,14 +15,14 @@ const Login = () => {
     //         center: 'both'
     //     },
     //     Shark: {
-    //         password: 'sharkstl@123',
+    //         password: 'Sharkstl@123',
     //         role: 'user',
-    //         center: 'SHARK'
+    //         center: 'Shark'
     //     },
     //     Fortune: {
-    //         password: 'fortunestl@123',
+    //         password: 'Fortunestl@123',
     //         role: 'user',
-    //         center: 'FORTUNE'
+    //         center: 'Fortune'
     //     }
     // };
 

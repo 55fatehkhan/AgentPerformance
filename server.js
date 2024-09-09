@@ -16,7 +16,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.log(err));
 
-mongoose.set("debug", true);    
+// mongoose.set("debug", true);    
 
 // User schema and model
 const userSchema = new mongoose.Schema({
@@ -48,7 +48,6 @@ const reportSchema = new mongoose.Schema({
 
 const Report = mongoose.model('dialerdailyreport', reportSchema);
 
-// Schema and Model for contacts
 const contactSchema = new mongoose.Schema({
     phone: String,
     dataset: String,
@@ -56,13 +55,94 @@ const contactSchema = new mongoose.Schema({
 });
 const Contact = mongoose.model('contact', contactSchema);
 
-// Schema and Model for threewayreports
 const threeWaySchema = new mongoose.Schema({
     phone: String,
     reportDate: Date,
     duration: Number
 });
 const ThreeWayReport = mongoose.model('threewayreport', threeWaySchema);
+
+// Schema and Model for voipcosts
+const voipCostSchema = new mongoose.Schema({
+    date: { type: Date, required: true },
+    totalCost: { type: Number, required: true },
+    provider: { type: String, required: true },
+    center: { type: String, required: true }
+});
+
+const VoipCost = mongoose.model('voipcost', voipCostSchema);
+
+
+// Endpoint to add a new VoIP cost
+app.post('/api/voipcosts', async (req, res) => {
+    const { date, totalCost, provider, center } = req.body;
+
+    try {
+        // Create a new VoIP cost entry
+        const newVoipCost = new VoipCost({
+            date,
+            totalCost,
+            provider,
+            center
+        });
+        await newVoipCost.save();
+        res.status(201).json(newVoipCost);
+    } catch (error) {
+        console.error('Error saving VoIP cost:', error);
+        res.status(500).json({ message: 'Error saving VoIP cost', error });
+    }
+});
+
+
+// Endpoint to get VoIP costs Data complete(as per filter)
+app.post('/api/voipcosts/filters', async (req, res) => {
+    const { fromDate, toDate, center, dialer } = req.body;
+
+    try {
+        
+        const pipeline = [
+            {
+                $match: {
+                    date: {
+                        $gte: new Date(fromDate),
+                        $lt: new Date(toDate)
+                    },
+                    center: center || { $exists: true },
+                    provider: dialer || { $exists: true }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    date: 1,
+                    center: 1,
+                    provider: 1,
+                    totalCost: 1
+                }
+            }
+        ];
+
+        // Execute aggregation
+        const filteredData = await VoipCost.aggregate(pipeline);
+        res.status(200).json(filteredData);
+    } catch (error) {
+        console.error('Error fetching filtered VoIP costs:', error);
+        res.status(500).json({ message: 'Error fetching filtered VoIP costs', error });
+    }
+});
+
+
+// Endpoint to get all VoIP costs
+// app.get('/api/voipcosts', async (req, res) => {
+//     try {
+//         const voipCosts = await VoipCost.find();
+//         res.status(200).json(voipCosts);
+//     } catch (error) {
+//         console.error('Error fetching VoIP costs:', error);
+//         res.status(500).json({ message: 'Error fetching VoIP costs', error });
+//     }
+// });
+
 
 
 // Login endpoint
@@ -104,7 +184,7 @@ app.post('/api/runtimeperformance', async (req, res) => {
     //centerName match condition
     let centerNameMatch;
     if (centerName === "Both") {
-        centerNameMatch = { $in: ["SHARK", "FORTUNE"] };
+        centerNameMatch = { $in: ["Shark", "Fortune"] };
     } else {
         centerNameMatch = centerName;
     }
@@ -112,7 +192,7 @@ app.post('/api/runtimeperformance', async (req, res) => {
     //provider match condition
     let providerMatch;
     if (provider === "Both") {
-        providerMatch = { $in: ["Telcast", "Phdialer"] };
+        providerMatch = { $in: ["telcast", "phdialer"] };
     } else {
         providerMatch = provider;
     }
@@ -163,8 +243,8 @@ app.post('/api/agentPerformance', async (req, res) => {
     const { fromDate, toDate,  center, dialer, campaign } = req.body;
 
     const getCampaignIds = () => {
-        if (center === 'SHARK') {
-            if (dialer === 'Telcast') {
+        if (center === 'Shark') {
+            if (dialer === 'telcast') {
                 if (campaign === 'Outbound') {
                     return ["SH_HWG", "SH_HWG2"];
                 } else if (campaign === 'Inbound') {
@@ -172,7 +252,7 @@ app.post('/api/agentPerformance', async (req, res) => {
                 } else if (campaign === 'Both') {
                     return ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT"];
                 }
-            } else if (dialer === 'Phdialer') {
+            } else if (dialer === 'phdialer') {
                 if (campaign === 'Outbound') {
                     return ["HW", "HW_2"];
                 } else if (campaign === 'Inbound') {
@@ -189,8 +269,8 @@ app.post('/api/agentPerformance', async (req, res) => {
                     return ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "HW", "HW_2", "CallerID", "INBOUNDH", "HWXFER"];
                 }
             }
-        } else if (center === 'FORTUNE') {
-            if (dialer === 'Telcast') {
+        } else if (center === 'Fortune') {
+            if (dialer === 'telcast') {
                 if (campaign === 'Outbound') {
                     return ["FT_HW", "FT_JARED"];
                 } else if (campaign === 'Inbound') {
@@ -205,6 +285,33 @@ app.post('/api/agentPerformance', async (req, res) => {
     
     const campaignIds = getCampaignIds();
     // console.log('Received Filters:', { fromDate, toDate, campaignIds, center, dialer });
+
+    // Define variables for dynamic center and provider (dialer)
+    let centerNameFilter;
+    let dialerFilter;
+
+    // Set centerNameFilter based on center input
+    if (center === 'Shark') {
+        centerNameFilter = "Shark";
+    } else if (center === 'Fortune') {
+        centerNameFilter = "Fortune";
+    } else if (center === 'Both') {
+        centerNameFilter = ["Shark", "Fortune"];
+    }
+
+    // Set dialerFilter based on dialer input
+    if (dialer === 'telcast') {
+        dialerFilter = "telcast";
+    } else if (dialer === 'phdialer') {
+        dialerFilter = "phdialer";
+    } else if (dialer === 'Both') {
+        dialerFilter = ["telcast", "phdialer"];
+    }
+
+    // Debugging - console logs
+    console.log('Center Name Filter:', centerNameFilter);
+    console.log('Dialer Filter:', dialerFilter);
+
 
   // Create Date objects from received date strings
   const fromDateObj = new Date(fromDate);  // Start of the day
@@ -223,7 +330,7 @@ app.post('/api/agentPerformance', async (req, res) => {
 
     if (center) {
         if (center === 'Both') {
-            matchCondition.centerName = { $in: ["SHARK", "FORTUNE"] };
+            matchCondition.centerName = { $in: ["Shark", "Fortune"] };
         } else {
             matchCondition.centerName = center;
         }
@@ -231,11 +338,11 @@ app.post('/api/agentPerformance', async (req, res) => {
 
     if (dialer) {
         if (dialer === 'Both') {
-            matchCondition.provider = { $in: ["Telcast", "Phdialer"] };
-        } else if (dialer === 'Telcast') {
-            matchCondition.provider = { $in: ["Telcast"] };
-        } else if (dialer === 'Phdialer') {
-            matchCondition.provider = { $in: ["Phdialer"] };
+            matchCondition.provider = { $in: ["telcast", "phdialer"] };
+        } else if (dialer === 'telcast') {
+            matchCondition.provider = { $in: ["telcast"] };
+        } else if (dialer === 'phdialer') {
+            matchCondition.provider = { $in: ["phdialer"] };
         }
     }
 
@@ -245,213 +352,168 @@ app.post('/api/agentPerformance', async (req, res) => {
     try {
         const aggregationPipeline = [
             { $match: matchCondition },
-            {
-                $addFields: {
-                    classification: {
-                        $cond: {
-                            if: {
-                                $in: ["$status", [
-                                    "CALLBK", "CB", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER", "B",
-                                    "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP", "SC", "SOD",
-                                    "Xferh", "LB", "HO", "AFTHRS","BN", "B","DROP", "DROP", "INXFER", "LB",
+               // Step 2: Classify statuses as HUMAN or MACHINE
+        {
+            $addFields: {
+                classification: {
+                    $cond: {
+                        if: {
+                            $in: [
+                                "$status",
+                                [
+                                    "CALLBK", "CB", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER",
+                                    "B", "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP",
+                                    "SC", "SOD", "Xferh", "LB", "HO", "AFTHRS", "BN", "DROP", "INXFER", "LB", 
                                     "NHO", "WN", "XFER"
-                                ]]
-                            },
-                            then: "HUMAN",
-                            else: "MACHINE"
+                                ]
+                            ]
+                        },
+                        then: "HUMAN",
+                        else: "MACHINE"
+                    }
+                }
+            }
+        },
+        // Step 3: Group by agentName and calculate total duration
+        {
+            $group: {
+                _id: "$agentName",
+                Human: {
+                    $sum: { $cond: [{ $eq: ["$classification", "HUMAN"] }, 1, 0] }
+                },
+                Machine: {
+                    $sum: { $cond: [{ $eq: ["$classification", "MACHINE"] }, 1, 0] }
+                },
+                GrandTotal: { $sum: 1 },
+                totalDurationSeconds: { $sum: "$duration" }
+            }
+        },
+        // Step 4: Convert total duration to minutes
+        {
+            $addFields: {
+                totalDurationMinutes: { $round: [{ $divide: ["$totalDurationSeconds", 60] }, 2] }
+            }
+        },
+        // Step 5: Lookup total attempts and total paid from threewayreports
+        {
+            $lookup: {
+                from: "threewayreports",
+                let: { agentName: "$_id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$full_name", "$$agentName"] },
+                                    { $gte: ["$reportDate", fromDateObj] },
+                                    { $lt: ["$reportDate", toDateObj] }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: "$full_name",
+                            totalAttempts: { $sum: 1 },
+                            totalPaid: {
+                                $sum: { $cond: [{ $gte: ["$duration", 100] }, 1, 0] }
+                            }
                         }
                     }
-                }
-            },
-            {
-                $group: {
-                    _id: "$agentName",
-                    Human: { $sum: { $cond: [{ $eq: ["$classification", "HUMAN"] }, 1, 0] } },
-                    Machine: { $sum: { $cond: [{ $eq: ["$classification", "MACHINE"] }, 1, 0] } },
-                    GrandTotal: { $sum: 1 },
-                    totalDurationSeconds: {
-                      $sum: "$duration"
-                    }
-                }
-            },
-            {
-                $addFields: {
-                    totalDurationMinutes: {
-                      $round: [
-                        {
-                          $divide: ["$totalDurationSeconds", 60]
-                        },
-                        2
-                      ]
-                    },
-                    costPerAgent: {
-                      $round: [
-                        {
-                          $multiply: [
-                            {
-                              $divide: ["$totalDurationSeconds", 60]
-                            },
-                            0.0055
-                          ]
-                        },
-                        2
-                      ]
-                    }
-                  }
-            },
-            {
-               $lookup: {
-    from: "threewayreports",
-    let: { agentName: "$_id" },
-    pipeline: [
+                ],
+                as: "attemptsData"
+            }
+        },
+        // Step 6: Add Total Attempts, Total Paid, and calculations
         {
-            $match: {
-                $expr: {
-                    $and: [
-                        { $eq: ["$full_name", "$$agentName"] },
-                        { $gte: ["$reportDate", fromDateObj] },
-                        { $lt: ["$reportDate", toDateObj] }
-                    ]
+            $addFields: {
+                TotalAttempts: { $arrayElemAt: ["$attemptsData.totalAttempts", 0] },
+                TotalPaid: { $arrayElemAt: ["$attemptsData.totalPaid", 0] },
+                "Total Calls per Attempts": {
+                    $cond: {
+                        if: { $gt: [{ $arrayElemAt: ["$attemptsData.totalAttempts", 0] }, 0] },
+                        then: { $round: [{ $divide: ["$Human", { $arrayElemAt: ["$attemptsData.totalAttempts", 0] }] }, 2] },
+                        else: 0
+                    }
+                },
+                "No of Calls Per Paid": {
+                    $cond: {
+                        if: { $gt: [{ $arrayElemAt: ["$attemptsData.totalPaid", 0] }, 0] },
+                        then: { $round: [{ $divide: ["$Human", { $arrayElemAt: ["$attemptsData.totalPaid", 0] }] }, 2] },
+                        else: 0
+                    }
+                }
+            }
+        },
+        // Step 7: Sort results by GrandTotal
+        { $sort: { GrandTotal: -1 } },
+        // Step 8: Group data and calculate human answer percentage
+        {
+            $group: {
+                _id: null,
+                totalHumanAnswers: { $sum: "$Human" },
+                agentsData: { $push: "$$ROOT" }
+            }
+        },
+        { $unwind: "$agentsData" },
+        {
+            $addFields: {
+                "agentsData.HumanAnswerPercentageOutofTotalHA": {
+                    $round: [{ $multiply: [{ $divide: ["$agentsData.Human", "$totalHumanAnswers"] }, 100] }, 2]
+                },
+                "agentsData.totalHumanAnswers": "$totalHumanAnswers"
+            }
+        },
+        { $replaceRoot: { newRoot: "$agentsData" } },
+        // Step 9: Lookup and allocate cost from voipcosts
+        {
+            $lookup: {
+                from: "voipcosts",
+                let: { center: centerNameFilter, provider: dialerFilter, startDate: fromDateObj, endDate: toDateObj },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$center", "$$center"] },
+                                    { $eq: ["$provider", "$$provider"] },
+                                    { $gte: ["$date", "$$startDate"] },
+                                    { $lt: ["$date", "$$endDate"] }
+                                    // { $in: ["$center", Array.isArray(centerNameFilter) ? centerNameFilter : [centerNameFilter]] },
+                                    //     { $in: ["$provider", Array.isArray(dialerFilter) ? dialerFilter : [dialerFilter]] },
+                                    //     { $gte: ["$date", "$$startDate"] },
+                                    //     { $lt: ["$date", "$$endDate"] }
+                                ]
+                            }
+                        }
+                    },
+                    { $group: { _id: null, totalCost: { $sum: "$totalCost" } } }
+                ],
+                as: "voipCostData"
+            }
+        },
+        {
+            $addFields: {
+                totalVoipCost: { $arrayElemAt: ["$voipCostData.totalCost", 0] },
+                allocatedCost: {
+                    $round: [{ $multiply: ["$HumanAnswerPercentageOutofTotalHA", { $divide: ["$totalVoipCost", 100] }] }, 2]
                 }
             }
         },
         {
-            $group: {
-                _id: "$full_name",
-                totalAttempts: { $sum: 1 },
-                totalPaid: {
-                    $sum: {
-                        $cond: [
-                            { $gte: ["$duration", 100] },
-                            1,
-                            0
-                        ]
-                    }
+            $addFields: {
+                allocatedCost: {
+                    $round: [{ $multiply: ["$HumanAnswerPercentageOutofTotalHA", { $divide: ["$totalVoipCost", 100] }] }, 2]
                 }
+            }
+        },
+        // Step 10: Add final Human Answer % for each agent
+        {
+            $addFields: {
+                "Human Answer%": { $round: [{ $multiply: [{ $divide: ["$Human", "$GrandTotal"] }, 100] }, 2] }
             }
         }
-    ],
-    as: "attemptsData"
-}
-
-            },
-            {
-                $addFields: {
-                  
-                        TotalAttempts: {
-                          $arrayElemAt: [
-                            "$attemptsData.totalAttempts",
-                            0
-                          ]
-                        },
-                        TotalPaid: {
-                          $arrayElemAt: ["$attemptsData.totalPaid", 0]
-                        },
-                        "Total Calls per Attempts": {
-                          $cond: {
-                            if: {
-                              $gt: [
-                                {
-                                  $arrayElemAt: [
-                                    "$attemptsData.totalAttempts",
-                                    0
-                                  ]
-                                },
-                                0
-                              ]
-                            },
-                            then: {
-                              $round: [
-                                {
-                                  $divide: [
-                                    "$Human",
-                                    {
-                                      $arrayElemAt: [
-                                        "$attemptsData.totalAttempts",
-                                        0
-                                      ]
-                                    }
-                                  ]
-                                },
-                                2
-                              ]
-                            },
-                            else: 0
-                          }
-                        },
-                        "No of Calls Per Paid": {
-                          $cond: {
-                            if: {
-                              $gt: [
-                                {
-                                  $arrayElemAt: [
-                                    "$attemptsData.totalPaid",
-                                    0
-                                  ]
-                                },
-                                0
-                              ]
-                            },
-                            then: {
-                              $round: [
-                                {
-                                  $divide: [
-                                    "$Human",
-                                    {
-                                      $arrayElemAt: [
-                                        "$attemptsData.totalPaid",
-                                        0
-                                      ]
-                                    }
-                                  ]
-                                },
-                                2
-                              ]
-                            },
-                            else: 0
-                          }
-                        },
-                        costPerPaidLead: {
-                          $cond: {
-                            if: {
-                              $gt: [
-                                {
-                                  $arrayElemAt: [
-                                    "$attemptsData.totalPaid",
-                                    0
-                                  ]
-                                },
-                                0
-                              ]
-                            },
-                            then: {
-                              $round: [
-                                {
-                                  $divide: [
-                                    "$costPerAgent",
-                                    {
-                                      $arrayElemAt: [
-                                        "$attemptsData.totalPaid",
-                                        0
-                                      ]
-                                    }
-                                  ]
-                                },
-                                2
-                              ]
-                            },
-                            else: 0
-                          }
-                        }
-                      }
-            },
-            { $sort: { GrandTotal: -1 } },
-            {
-                $addFields: {
-                    "Human Answer%": { $round: [{ $multiply: [{ $divide: ["$Human", "$GrandTotal"] }, 100] }, 2] }
-                }
-            }
-        ];
+    ];
 
         const data = await Report.aggregate(aggregationPipeline);
         //console.log(data)
@@ -474,15 +536,15 @@ app.post('/api/filePerformance', async (req, res) => {
    let campaignValues = [];
    let providerValues = [];
 
-   if(dialer==='Telcast') {
-    providerValues = ["Telcast"];
-   }else if (dialer === 'Phdialer'){
-    providerValues = ["Phdialer"]
+   if(dialer==='telcast') {
+    providerValues = ["telcast"];
+   }else if (dialer === 'phdialer'){
+    providerValues = ["phdialer"]
    }else{
-    providerValues= ["Phdialer", "Telcast"]
+    providerValues= ["phdialer", "telcast"]
    }
 
-   if (center === 'SHARK' && dialer === 'Telcast') {
+   if (center === 'Shark' && dialer === 'telcast') {
        if (campaign === 'Outbound') {
            campaignValues = ["SH_HWG", "SH_HWG2"];
        } else if (campaign === 'Inbound') {
@@ -490,7 +552,7 @@ app.post('/api/filePerformance', async (req, res) => {
        } else if (campaign === 'Both') {
            campaignValues = ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT"];
        }
-   } else if (center === 'SHARK' && dialer === 'Phdialer') {
+   } else if (center === 'Shark' && dialer === 'phdialer') {
        if (campaign === 'Outbound') {
            campaignValues = ["HW", "HW_2"];
        } else if (campaign === 'Inbound') {
@@ -498,7 +560,7 @@ app.post('/api/filePerformance', async (req, res) => {
        } else if (campaign === 'Both') {
            campaignValues = ["HW", "HW_2", "CallerID", "INBOUNDH", "HWXFER"];
        }
-   }else if (center === 'SHARK' && dialer === 'Both') {
+   }else if (center === 'Shark' && dialer === 'Both') {
     if (campaign === 'Outbound') {
         campaignValues = ["HW", "HW_2", "SH_HWG", "SH_HWG2"];
     } else if (campaign === 'Inbound') {
@@ -506,7 +568,7 @@ app.post('/api/filePerformance', async (req, res) => {
     } else if (campaign === 'Both') {
         campaignValues = ["HW", "HW_2", "CallerID", "INBOUNDH", "HWXFER", "SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT"];
     }
-}  else if (center === 'FORTUNE' && dialer === 'Telcast') {
+}  else if (center === 'Fortune' && dialer === 'telcast') {
        if (campaign === 'Outbound') {
            campaignValues = ["FT_HW", "FT_JARED"];
        } else if (campaign === 'Inbound') {
