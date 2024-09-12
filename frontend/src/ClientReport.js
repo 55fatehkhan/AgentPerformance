@@ -1,9 +1,289 @@
 import './ClientReport.css';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Box, Typography, CircularProgress, Card, CardContent, Button } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 
 const ClientReport = () => {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        navigate('/');
+    };
+
+    const [filters, setFilters] = useState({
+        centerName: '',
+        provider: '',
+        fromDate: '',
+        toDate: '',
+        Month: '',
+        BiweeklyDate: ''
+    });
+
+    const Loggedin_centerName = sessionStorage.getItem('centerName');
+
+    const [results, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    useEffect(() => {
+        if (Loggedin_centerName) {
+            setFilters((prevFilters) => ({
+                ...prevFilters,
+                center: Loggedin_centerName
+            }));
+        }
+    }, [Loggedin_centerName]);
+
+    const handleInputChange = (e) => {
+        const { name, value, multiple } = e.target;
+
+        // Check if it's Month or BiweeklyDate and handle multiple selection
+        if (name === 'Month' || name === 'BiweeklyDate') {
+            const selectedValues = Array.from(e.target.selectedOptions, option => option.value);
+            setFilters({
+                ...filters,
+                [name]: selectedValues, // Store as an array
+            });
+        } else {
+            // Handle single selection dropdowns
+            setFilters({
+                ...filters,
+                [name]: value,
+            });
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setIsSubmitted(true);
+
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/clientReport`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(filters),
+            });
+
+            const result = await response.json();
+            setData(result);
+        } catch (error) {
+            console.error('Error fetching client report data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleReset = () => {
+        setFilters({
+            centerName: '',
+            provider: '',
+            fromDate: '',
+            toDate: '',
+            Month: '',
+            BiweeklyDate: ''
+        });
+        setData([]);
+        setIsSubmitted(false);
+    };
+
+    const convertToCSV = (arr) => {
+        const array = [Object.keys(arr[0])].concat(arr);
+        return array.map(it => {
+            return Object.values(it).join(',');
+        }).join('\n');
+    };
+
+    const downloadCSV = () => {
+        const csv = convertToCSV(results);
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'client_report_data.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const columns = [
+        
+        { field: 'listId', headerName: 'Data Type', width: 150 },
+        { field: 'count', headerName: 'Total Count', width: 150 },
+        { field: 'status', headerName: 'Status', width: 150 },
+        { field: 'dataset', headerName: 'Dataset', width: 150 },
+        { field: 'centerName', headerName: 'Center Name', width: 150 }
+    ];
+
     return (
-        <div className="client-report">
-            <h1>Client Report</h1>
+        <div className="clientreport-container">
+            <header className="clientreport-header">
+                <h1>Client Report Analysis Dashboard</h1>
+                <div className="user-info">
+                    <button className="logout-btn" onClick={handleLogout}>Logout 🔒</button>
+                </div>
+            </header>
+
+            <div className="filter-section">
+                <form onSubmit={handleSubmit} className="filter-form">
+                    <div className="filter-row">
+                        <div className="filter-field">
+                            <label htmlFor="fromDate">From Date</label>
+                            <input
+                                type="date"
+                                id="fromDate"
+                                name="fromDate"
+                                value={filters.fromDate}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                        <div className="filter-field">
+                            <label htmlFor="toDate">To Date</label>
+                            <input
+                                type="date"
+                                id="toDate"
+                                name="toDate"
+                                value={filters.toDate}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                        <div className="filter-field">
+    <label htmlFor="centerName">Center Name</label>
+    <select
+        id="centerName"
+        name="centerName"
+        value={filters.centerName}
+        onChange={handleInputChange}
+    >
+                            {Loggedin_centerName === 'both' && <option value="">Select Center</option>}
+                            {Loggedin_centerName === 'both' && <option value="Shark">Shark</option>}
+                            {Loggedin_centerName === 'both' && <option value="Fortune">Fortune</option>}
+                            {/* {Loggedin_centerName === 'both' && <option value="Both">Both</option>} */}
+
+                            {Loggedin_centerName === 'Shark' && <option value="">Select Center</option>}
+                            {Loggedin_centerName === 'Shark' && <option value="Shark">Shark</option>}
+
+                            {Loggedin_centerName === 'Fortune' && <option value="">Select Center</option>}
+                            {Loggedin_centerName === 'Fortune' && <option value="Fortune">Fortune</option>}
+    </select>
+</div>
+
+<div className="filter-field">
+    <label htmlFor="provider">Dialer</label>
+    <select
+        id="provider"
+        name="provider"
+        value={filters.provider}
+        onChange={handleInputChange}
+    >
+                            {Loggedin_centerName === 'both' && <option value="">Dialer</option>}
+                            {Loggedin_centerName === 'both' && <option value="telcast">Telcast</option>}
+                            {Loggedin_centerName === 'both' && <option value="phdialer">Phdialer</option>}
+                            {/* {Loggedin_centerName === 'both' && <option value="Both">Both</option>} */}
+
+                            {Loggedin_centerName === 'Shark' && <option value="">Dialer</option>}
+                            {Loggedin_centerName === 'Shark' && <option value="telcast">Telcast</option>}
+                            {Loggedin_centerName === 'Shark' && <option value="phdialer">Phdialer</option>}
+                            {/* {Loggedin_centerName === 'Shark' && <option value="Both">Both</option>} */}
+
+                            {Loggedin_centerName === 'Fortune' && <option value="">Dialer</option>}
+                            {Loggedin_centerName === 'Fortune' && <option value="telcast">Telcast</option>}
+    </select>
+</div>
+
+</div>
+<div className="filter-row">
+  
+  <div className="filter-field">
+    <label htmlFor="Month">Month</label>
+    <select
+        id="Month"
+        name="Month"
+        value={filters.Month}
+        onChange={handleInputChange}
+        multiple // multiple values
+    >
+     <option value="">Choose</option>
+     <option value="Aug-24">Aug-24</option>
+     <option value="Jul-24">Jul-24</option>
+     <option value="Jun-24">Jun-24</option>
+     <option value="May-24">May-24</option>
+     <option value="Apr-24">Apr-24</option>
+     <option value="Mar-24">Mar-24</option>
+     <option value="Feb-24">Feb-24</option>
+     <option value="Jan-24">Jan-24</option>
+
+    </select>
+</div>
+
+<div className="filter-field">
+    <label htmlFor="BiweeklyDate">Biweekly Date</label>
+    <select
+        id="BiweeklyDate"
+        name="BiweeklyDate"
+        value={filters.BiweeklyDate}
+        onChange={handleInputChange}
+        multiple
+    >
+     <option value="">Choose</option>
+     <option value="Second_Half_Aug_2024">Second_Half_Aug_2024</option>
+     <option value="First_Half_Aug_2024">First_Half_Aug_2024</option>
+     <option value="Second_Half_July_2024">Second_Half_July_2024</option>
+     <option value="First_Half_July_2024">First_Half_July_2024</option>
+     <option value="Second_Half_June_2024">Second_Half_June_2024</option>
+     <option value="First_Half_June_2024">First_Half_June_2024</option>
+     <option value="Second_Half_May_2024">Second_Half_May_2024</option>
+     <option value="First_Half_May_2024">First_Half_May_2024</option>
+    </select>
+</div>
+
+        
+                    </div>
+                    <div className="filter-actions">
+                        <button type="submit" className="submit-btn">Submit</button>
+                        <button type="button" className="reset-btn" onClick={handleReset}>Reset</button>
+                    </div>
+                </form>
+            </div>
+
+            <div className="clientreport-content">
+                {/* Loading Spinner */}
+              {loading && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
+                    <CircularProgress />
+                    <Typography variant="body1" sx={{ ml: 2 }}>please wait...</Typography>
+                </Box>
+            )}
+
+            {isSubmitted && !loading && results.length > 0 && (
+                <Card>
+                    <CardContent>
+                    <Button 
+                            variant="contained" 
+                            color="primary" 
+                            style={{ marginTop: '5px', marginBottom: '15px' }} 
+                            onClick={downloadCSV}>
+                            Download CSV
+                        </Button>
+                    <div style={{ height: 400, width: '100%', overflow: 'auto' }}>
+                        <DataGrid
+                            rows={results}
+                            columns={columns}
+                            pageSize={10}
+                            rowsPerPageOptions={[10, 20, 50]}
+                            checkboxSelection
+                            disableSelectionOnClick
+                            getRowId={(row) => `${row.count}-${row.status}-${row.listId}-${row.centerName}-${row.dataset}`}
+                            
+                        />
+                    </div>
+                    </CardContent>
+                    </Card>
+                    
+            )}
+            </div>
         </div>
     );
 };

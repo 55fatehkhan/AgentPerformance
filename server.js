@@ -16,7 +16,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.log(err));
 
-// mongoose.set("debug", true);    
+mongoose.set("debug", true);    
 
 // User schema and model
 const userSchema = new mongoose.Schema({
@@ -27,6 +27,18 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model('user', userSchema);
+
+// ClientReport
+const ClientReportSchema = new mongoose.Schema({
+    centerName: String,
+    provider: String,
+    fromDate: Date,
+    toDate: Date,
+    Month: String,
+    BiweeklyDate: String
+});
+
+const ClientReport = mongoose.model('clientreportanalysi', ClientReportSchema);
 
 const runtimeSchema = new mongoose.Schema({
     dialedAt: Date,
@@ -71,6 +83,112 @@ const voipCostSchema = new mongoose.Schema({
 });
 
 const VoipCost = mongoose.model('voipcost', voipCostSchema);
+
+// clientReport
+app.post('/api/clientReport', async (req, res) => {
+    try {
+        const { centerName, provider, fromDate, toDate, Month, BiweeklyDate } = req.body;
+        console.log("Received from frontend:", { centerName, provider, fromDate, toDate, Month, BiweeklyDate });
+
+
+        const matchConditions = {};
+        
+       // Handle centerName (single or multiple values)
+       if (centerName) {
+        if (Array.isArray(centerName)) {
+            matchConditions['Center'] = { $in: centerName }; // For multiple center names
+        } else {
+            matchConditions['Center'] = centerName; // For a single center name
+        }
+    }
+    
+    // Handle provider (single or multiple values)
+    if (provider) {
+        if (Array.isArray(provider)) {
+            matchConditions['campaign2'] = { $in: provider }; // For multiple providers
+        } else {
+            matchConditions['campaign2'] = provider; // For a single provider
+        }
+    }
+
+    // Handle Transfer Date (fromDate and toDate must both be provided)
+    if (fromDate && toDate) {
+        matchConditions['Transfer Date'] = {
+            $gte: new Date(fromDate),
+            $lte: new Date(toDate)
+        };
+    }
+
+    // Handle Month (single or multiple values)
+    if (Month) {
+        if (Array.isArray(Month)) {
+            matchConditions['Month'] = { $in: Month }; // For multiple months
+        } else {
+            matchConditions['Month'] = Month; // For a single month
+        }
+    }
+
+    // Handle BiweeklyDate (single or multiple values)
+    if (BiweeklyDate) {
+        if (Array.isArray(BiweeklyDate)) {
+            matchConditions['Date'] = { $in: BiweeklyDate }; // For multiple Biweekly dates
+        } else {
+            matchConditions['Date'] = BiweeklyDate; // For a single Biweekly date
+        }
+    }
+
+        //match condition for debug
+        console.log("Final match conditions:", matchConditions);
+
+        const pipeline = [
+            {
+                $match: matchConditions
+            },
+            {
+                $lookup: {
+                    from: "contacts", 
+                    localField: "phone",  
+                    foreignField: "phone", 
+                    as: "contactDetails"  
+                }
+            },
+            {
+                $unwind: "$contactDetails"
+            },
+            {
+                $group: {
+                    _id: {
+                        status: "$status",
+                        dataset: "$contactDetails.dataset",
+                        listId: "$contactDetails.listId",
+                        centerName: "$contactDetails.centerName"
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    status: "$_id.status",
+                    dataset: "$_id.dataset",
+                    listId: "$_id.listId",
+                    centerName: "$_id.centerName",
+                    count: 1,
+                    _id: 0
+                }
+            },
+            {
+                $sort: { status: 1, count: -1 }
+            }
+        ];
+        const results = await ClientReport.aggregate(pipeline);
+        // console.log("Aggregated results:", results);
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error running aggregation:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 
 // Endpoint to add a new VoIP cost

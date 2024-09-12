@@ -20,7 +20,7 @@ const RuntimePerformance = () => {
 
     const Loggedin_centerName = sessionStorage.getItem('centerName');
 
-    const [data, setData] = useState([]);
+    const [results, setData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -83,7 +83,7 @@ const RuntimePerformance = () => {
     };
 
     const downloadCSV = () => {
-        const csv = convertToCSV(data);
+        const csv = convertToCSV(results);
         const blob = new Blob([csv], { type: 'text/csv' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
@@ -202,7 +202,7 @@ const RuntimePerformance = () => {
                 </Box>
             )}
 
-            {isSubmitted && !loading && data.length > 0 && (
+            {isSubmitted && !loading && results.length > 0 && (
                 <Card>
                     <CardContent>
                     <Button 
@@ -214,7 +214,7 @@ const RuntimePerformance = () => {
                         </Button>
                     <div style={{ height: 400, width: '100%', overflow: 'auto' }}>
                         <DataGrid
-                            rows={data}
+                            rows={results}
                             columns={columns}
                             pageSize={10}
                             rowsPerPageOptions={[10, 20, 50]}
