@@ -229,7 +229,7 @@ const ClientReport = () => {
         multiple
     >
      <option value="">Choose</option>
-     <option value="Second_Half_Sept_2024">First_Half_Sept_2024</option>
+     <option value="Second_Half_Sept_2024">Second_Half_Sept_2024</option>
      <option value="First_Half_Sept_2024">First_Half_Sept_2024</option>
      <option value="Second_Half_Aug_2024">Second_Half_Aug_2024</option>
      <option value="First_Half_Aug_2024">First_Half_Aug_2024</option>
