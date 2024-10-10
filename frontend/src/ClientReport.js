@@ -206,6 +206,7 @@ const ClientReport = () => {
         multiple // multiple values
     >
      <option value="">Choose</option>
+     <option value="September-2024">September-2024</option>
      <option value="Aug-24">Aug-24</option>
      <option value="Jul-24">Jul-24</option>
      <option value="Jun-24">Jun-24</option>
@@ -228,6 +229,8 @@ const ClientReport = () => {
         multiple
     >
      <option value="">Choose</option>
+     <option value="Second_Half_Sept_2024">First_Half_Sept_2024</option>
+     <option value="First_Half_Sept_2024">First_Half_Sept_2024</option>
      <option value="Second_Half_Aug_2024">Second_Half_Aug_2024</option>
      <option value="First_Half_Aug_2024">First_Half_Aug_2024</option>
      <option value="Second_Half_July_2024">Second_Half_July_2024</option>

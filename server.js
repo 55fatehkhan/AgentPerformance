@@ -16,7 +16,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.log(err));
 
-// mongoose.set("debug", true);    
+//mongoose.set("debug", true);    
 
 // User schema and model
 const userSchema = new mongoose.Schema({
