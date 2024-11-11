@@ -23,6 +23,9 @@ const SessionSelection = () => {
     const goToClientReport = () => {
         navigate('/ClientReport'); 
     };
+    const goToThreeWayReport = () => {
+        navigate('/ThreeWayReport'); 
+    };
 
     return (
         <div className="session-selection-container">
@@ -47,6 +50,10 @@ const SessionSelection = () => {
                 <div className="card" onClick={goToClientReport}>
                     <h2>Client Report</h2>
                     <p>Client Report analysis and along with how our data performs for client, everything</p>
+                </div>
+                <div className="card" onClick={goToThreeWayReport}>
+                    <h2>Threeway Report</h2>
+                    <p>Threeway Report for analysis</p>
                 </div>
             </div>
         </div>

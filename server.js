@@ -49,6 +49,15 @@ const runtimeSchema = new mongoose.Schema({
 
 const RuntimeReport = mongoose.model('runtimelog', runtimeSchema);
 
+const threewaySchema = new mongoose.Schema({
+    dialedAt: Date,
+    campaignId: String,
+    centerName: String, 
+    provider: String   
+});
+
+const ThreewayReport = mongoose.model('threewaylog', threewaySchema);
+
 const reportSchema = new mongoose.Schema({
     agentName: String,
     status: String,
@@ -353,6 +362,88 @@ app.post('/api/runtimeperformance', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
+
+// Threeway Report endpoint
+app.post('/api/threewayreports', async (req, res) => {
+    const { centerName, provider, fromDate, toDate } = req.body;
+
+    // console.log('Received threeway filters:', { fromDate, toDate, centerName, provider });
+
+    //centerName match condition
+    let centerNameMatch;
+    if (centerName === "Both") {
+        centerNameMatch = { $in: ["Shark", "Fortune"] };
+    } else {
+        centerNameMatch = centerName;
+    }
+
+    //provider match condition
+    let providerMatch;
+    if (provider === "Both") {
+        providerMatch = { $in: ["telcast", "phdialer"] };
+    } else {
+        providerMatch = provider;
+    }
+
+    try {
+        const aggregationPipeline = [
+            {
+                $match: {
+                    centerName: centerNameMatch,
+                    provider: providerMatch,
+                    reportDate: {
+                        $gte: new Date(fromDate),
+                        $lte: new Date(toDate)
+                    }
+                }
+            },
+            {
+                $sort: {
+                    phone: 1,
+                    duration: -1
+                }
+            },
+            {
+                $group: {
+                    _id: "$phone",
+                    fname: { $first: "$fname" },
+                    lname: { $first: "$lname" },
+                    state: { $first: "$state" },
+                    zip: { $first: "$zip" },
+                    phone: { $first: "$phone" },
+                    duration: { $first: "$duration" },
+                    full_name: { $first: "$full_name" },
+                    agent: { $first: "$agent" },
+                    transfer_time: { $first: "$transfer_time" },
+                    centerName: { $first: "$centerName" },
+                    provider: { $first: "$provider" }
+                }
+            },
+            {
+                $project: {
+                    fname: 1,
+                    lname: 1,
+                    state: 1,
+                    zip: 1,
+                    phone: 1,
+                    duration: 1,
+                    full_name: 1,
+                    agent: 1,
+                    transfer_time: 1,
+                    centerName: 1,
+                    provider: 1
+                }
+            }
+        ];
+
+        const results = await ThreeWayReport.aggregate(aggregationPipeline);
+        res.json(results);
+    } catch (error) {
+        console.error("Error fetching Threeway data: ", error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+});
+
 
 
 

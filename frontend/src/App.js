@@ -7,6 +7,7 @@ import FilePerformance from './FilePerformance';
 import RuntimePerformance from './RuntimePerformance';
 import VoipCost from './VoipCost';
 import ClientReport from './ClientReport';
+import ThreeWayReport from './ThreeWayReport';
 
 
 function App() {
@@ -19,7 +20,8 @@ function App() {
                 <Route path="/FilePerformance" element={<FilePerformance />} /> 
                 <Route path="/RuntimePerformance" element={<RuntimePerformance />} /> 
                 <Route path="/VoipCost" element={<VoipCost />} /> 
-                <Route path="/ClientReport" element={<ClientReport />} /> 
+                <Route path="/ClientReport" element={<ClientReport />} />
+                <Route path="/ThreeWayReport" element={<ThreeWayReport />} />  
             </Routes>
         </Router>
     );
