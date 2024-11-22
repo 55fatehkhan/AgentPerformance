@@ -97,7 +97,7 @@ const VoipCost = mongoose.model('voipcost', voipCostSchema);
 app.post('/api/clientReport', async (req, res) => {
     try {
         const { centerName, provider, fromDate, toDate, Month, BiweeklyDate } = req.body;
-        console.log("Received from frontend:", { centerName, provider, fromDate, toDate, Month, BiweeklyDate });
+        //console.log("Received from frontend:", { centerName, provider, fromDate, toDate, Month, BiweeklyDate });
 
 
         const matchConditions = {};
@@ -147,7 +147,7 @@ app.post('/api/clientReport', async (req, res) => {
     }
 
         //match condition for debug
-        console.log("Final match conditions:", matchConditions);
+        //console.log("Final match conditions:", matchConditions);
 
         const pipeline = [
             {
@@ -518,8 +518,8 @@ app.post('/api/agentPerformance', async (req, res) => {
     }
 
     // Debugging - console logs
-    console.log('Center Name Filter:', centerNameFilter);
-    console.log('Dialer Filter:', dialerFilter);
+   // console.log('Center Name Filter:', centerNameFilter);
+   // console.log('Dialer Filter:', dialerFilter);
 
 
   // Create Date objects from received date strings
@@ -556,7 +556,7 @@ app.post('/api/agentPerformance', async (req, res) => {
     }
 
     // Debug
-    console.log('Match Condition:', matchCondition);
+    //'Match Condition:', matchCondition);
 
     try {
         const aggregationPipeline = [
@@ -736,11 +736,14 @@ app.post('/api/agentPerformance', async (req, res) => {
 
 // FILE PERFORMANCE
 app.post('/api/filePerformance', async (req, res) => {
-    const { fromDate, toDate, center, dialer, campaign } = req.body;
+    let { fromDate, toDate, center, dialer, campaign, dataset, listId, fileNumber } = req.body;
 
-    // console.log('Received input(fileperformance):  ', req.body);
+   // console.log('Received input(fileperformance):  ', req.body);
     const fromDateObj = new Date(fromDate).toISOString().split('T')[0];
     const toDateObj = new Date(toDate).toISOString().split('T')[0];
+
+    dataset = parseInt(dataset, 10);
+    fileNumber = parseInt(fileNumber, 10); 
 
    let campaignValues = [];
    let providerValues = [];
@@ -797,8 +800,45 @@ app.post('/api/filePerformance', async (req, res) => {
        campaignId: { $in: campaignValues }
    };
 
+    // Add listId filter only if it is provided
+    if (listId && listId.length) {
+        matchCondition.Source_listId = { $in: Array.isArray(listId) ? listId : [listId] };
+    }
+
+   // Add dataset filter only if it is valid
+if (dataset !== null && dataset !== undefined && !isNaN(dataset)) {
+    matchCondition.dataset = { $in: Array.isArray(dataset) ? dataset : [dataset] };
+}
+
+// Add fileNumber filter only if it is valid
+// if (fileNumber !== null && fileNumber !== undefined && !isNaN(fileNumber)) {
+//     matchCondition.file = { $in: Array.isArray(fileNumber) ? fileNumber : [fileNumber] };
+// }
+
+   // console.log(matchCondition);
+
     try {
         const aggregationPipeline = [
+            {
+                $lookup: {
+                    from: "contacts",
+                    localField: "phone",
+                    foreignField: "phone",
+                    as: "contactDetails"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$contactDetails"
+                }
+            },
+            {
+                $addFields: {
+                    dataset: "$contactDetails.dataset",
+                    Source_listId: "$contactDetails.listId",
+                    file: "$contactDetails.file"
+                }
+            },
             {
                 $match: matchCondition
             },
@@ -814,7 +854,7 @@ app.post('/api/filePerformance', async (req, res) => {
                                         [
                                             "CALLBK", "CB", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER", "B",
                                             "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP", "SC", "SOD",
-                                            "Xferh", "LB", "HO", "AFTHRS","BN", "B","DROP", "DROP", "INXFER", "LB",
+                                            "Xferh", "LB", "HO", "AFTHRS", "BN", "B", "DROP", "DROP", "INXFER", "LB",
                                             "NHO", "WN", "XFER"
                                         ]
                                     ]
@@ -834,7 +874,7 @@ app.post('/api/filePerformance', async (req, res) => {
                                             [
                                                 "CALLBK", "CB", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER", "B",
                                                 "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP", "SC", "SOD",
-                                                "Xferh", "LB", "HO", "AFTHRS","BN", "B","DROP", "DROP", "INXFER", "LB",
+                                                "Xferh", "LB", "HO", "AFTHRS", "BN", "B", "DROP", "DROP", "INXFER", "LB",
                                                 "NHO", "WN", "XFER"
                                             ]
                                         ]
@@ -865,8 +905,8 @@ app.post('/api/filePerformance', async (req, res) => {
                 $group: {
                     _id: {
                         dataset: "$contactDetails.dataset",
-                        listId: "$contactDetails.listId"
-                      //  file: "$contactDetails.file"
+                        listId: "$contactDetails.listId",
+                        file: "$contactDetails.file"
                     },
                     phoneCount: {
                         $sum: "$totalCount"
@@ -910,7 +950,7 @@ app.post('/api/filePerformance', async (req, res) => {
                 $project: {
                     dataset: "$_id.dataset",
                     listId: "$_id.listId",
-                   // file: "$_id.file",
+                    file: "$_id.file",
                     phoneCount: 1,
                     humanCount: 1,
                     nonHumanCount: 1,
@@ -932,42 +972,41 @@ app.post('/api/filePerformance', async (req, res) => {
             },
             {
                 $addFields: {
-    HA: {
-        $cond: {
-            if: { $gt: ["$phoneCount", 0] },
-            then: {
-                $round: [
-                    {
-                        $multiply: [
-                            { $divide: ["$humanCount", "$phoneCount"] },
-                            100
-                        ]
+                    HA: {
+                        $cond: {
+                            if: { $gt: ["$phoneCount", 0] },
+                            then: {
+                                $round: [
+                                    {
+                                        $multiply: [
+                                            { $divide: ["$humanCount", "$phoneCount"] },
+                                            100
+                                        ]
+                                    },
+                                    2
+                                ]
+                            },
+                            else: 0
+                        }
                     },
-                    2
-                ]
-            },
-            else: 0
-        }
-    },
-    NonHA: {
-        $cond: {
-            if: { $gt: ["$phoneCount", 0] },
-            then: {
-                $round: [
-                    {
-                        $multiply: [
-                            { $divide: ["$nonHumanCount", "$phoneCount"] },
-                            100
-                        ]
-                    },
-                    2
-                ]
-            },
-            else: 0
-        }
-    }
-}         
-           
+                    NonHA: {
+                        $cond: {
+                            if: { $gt: ["$phoneCount", 0] },
+                            then: {
+                                $round: [
+                                    {
+                                        $multiply: [
+                                            { $divide: ["$nonHumanCount", "$phoneCount"] },
+                                            100
+                                        ]
+                                    },
+                                    2
+                                ]
+                            },
+                            else: 0
+                        }
+                    }
+                }
             },
             {
                 $sort: { phoneCount: -1 }
@@ -976,7 +1015,7 @@ app.post('/api/filePerformance', async (req, res) => {
                 $project: {
                     _id: 0,
                     listId: 1,
-                  //  file: 1,
+                    file: 1,
                     dataset: 1,
                     phoneCount: 1,
                     humanCount: 1,
@@ -988,8 +1027,9 @@ app.post('/api/filePerformance', async (req, res) => {
                 }
             }
         ];
-
+       // console.log("Aggregation:  ", aggregationPipeline);
         const data = await Report.aggregate(aggregationPipeline);
+       // console.log("data:  ", data);
         res.json(data);
     } catch (err) {
         res.status(500).json({ message: err.message });

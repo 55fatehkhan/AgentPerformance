@@ -133,7 +133,7 @@ const FilePerformance = () => {
 
     const columns = [
         { field: 'listId', headerName: 'List ID', width: 150 },
-       // { field: 'file', headerName: 'File', width: 150 },
+        { field: 'file', headerName: 'File', width: 150 },
         { field: 'dataset', headerName: 'Dataset', width: 150 },
         { field: 'phoneCount', headerName: 'Phone Count', width: 150 },
         { field: 'humanCount', headerName: 'Human Count', width: 150 },
@@ -204,27 +204,69 @@ const FilePerformance = () => {
                             <option value="Both">Both</option>
                         </select>
                     </div>
-                    {/* <div className="filter-field">
-                        <label htmlFor="dataset">Dataset:</label>
-                        <select name="dataset" id="dataset" value={filters.dataset} onChange={handleChange}>
-                            <option value="">Dataset</option>
-                            <option value="1">Dataset 1</option>
-                            <option value="2">Dataset 2</option>
-                            <option value="3">Dataset 3</option>
-                        </select>
-                    </div>
-                    <div className="filter-field">
-                        <label htmlFor="datatype">Data Type:</label>
-                        <select name="datatype" id="datatype" value={filters.datatype} onChange={handleChange}>
-                            <option value="">Data Type</option>
-                            <option value="All">All</option>
-                            <option value="Danish">Danish</option>
-                            <option value="Jared">Jared</option>
-                        </select>
-                    </div> */}
+                    {/* Adding Dataset Filter */}
+                <div className="filter-field">
+                    <label htmlFor="dataset">Dataset:</label>
+                    <select
+                        name="dataset"
+                        id="dataset"
+                        value={filters.dataset}
+                        onChange={handleChange}
+                    >
+                        <option value="">Dataset</option>
+                        <option value="1">Dataset 1</option>
+                        <option value="2">Dataset 2</option>
+                        <option value="3">Dataset 3</option>
+                    </select>
+                </div>
+                {/* Adding ListId Filter */}
+                <div className="filter-field">
+                    <label htmlFor="listId">List ID:</label>
+                    <select
+                        name="listId"
+                        id="listId"
+                        value={filters.listId}
+                        onChange={handleChange}
+                    >
+                        <option value="">List ID</option>
+                        <option value="Jared1">Jared1</option>
+                        <option value="Jared2">Jared2</option>
+                        <option value="Jared3">Jared3</option>
+                        <option value="Jared4">Jared4</option>
+                        <option value="Jared5">Jared5</option>
+                        <option value="Jared6">Jared6</option>
+                        <option value="Jared7">Jared7</option>
+                        <option value="Jared8">Jared8</option>
+                        <option value="Jared9">Jared9</option>
+                        {/* <option value="AllJared">All Jared</option> */}
+                        <option value="Danish">Danish</option>
+                        {/* <option value="AutoInsuranceGold">AutoInsuranceGold</option> */}
+                    </select>
+                </div>
+                {/* Adding File Number Filter */}
+                {/* <div className="filter-field">
+                    <label htmlFor="fileNumber">File Number:</label>
+                    <select
+                        name="fileNumber"
+                        id="fileNumber"
+                        value={filters.fileNumber}
+                        onChange={handleChange}
+                    >
+                        <option value="">File Number</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                    </select>
+                </div> */}
                     <div className="filter-actions">
                         <button className="submit-btn" onClick={handleSubmit}>Submit</button>
-                        <button className="reset-btn" onClick={() => setFilters({ fromDate: '', toDate: '', dataset: '', center: '', dialer: '', datatype: '', campaign: '' })}>Reset</button>
+                        <button className="reset-btn" onClick={() => setFilters({ fromDate: '', toDate: '', dataset: '', center: '', dialer: '', datatype: '', campaign: '', dataset: '', fileNumber: '', listId: '' })}>Reset</button>
                     </div>
                 </div>
             </div>
@@ -256,7 +298,7 @@ const FilePerformance = () => {
                             rowsPerPageOptions={[10, 20, 50]}
                             checkboxSelection
                             disableSelectionOnClick
-                            getRowId={(row) => `${row.listId}-${row.dataset}`}
+                            getRowId={(row) => `${row.listId}-${row.dataset}-${row.phoneCount}-${row.humanCount}`}
                         />
                     </div>
                     </CardContent>
