@@ -488,8 +488,17 @@ app.post('/api/agentPerformance', async (req, res) => {
                     return ["FT_HW", "FT_JARED", "FT_Inbound", "FT_InboundCB2", "FT_InboundCB"];
                 }
             }
+        } else if (center === 'Leadsinteractive') {
+            if (dialer === 'ccs') {
+                if (campaign === 'Outbound') {
+                    return ["HOME", "HOME_1"];
+                }else if (campaign === 'Both') {
+                    return ["HOME", "HOME_1", "CallerID"];
+                }
+            }
         }
     };
+    
     
     
     const campaignIds = getCampaignIds();
@@ -499,23 +508,28 @@ app.post('/api/agentPerformance', async (req, res) => {
     let centerNameFilter;
     let dialerFilter;
 
-    // Set centerNameFilter based on center input
-    if (center === 'Shark') {
-        centerNameFilter = "Shark";
-    } else if (center === 'Fortune') {
-        centerNameFilter = "Fortune";
-    } else if (center === 'Both') {
-        centerNameFilter = ["Shark", "Fortune"];
-    }
+  // Set centerNameFilter based on center input
+if (center === 'Shark') {
+    centerNameFilter = "Shark";
+} else if (center === 'Fortune') {
+    centerNameFilter = "Fortune";
+} else if (center === 'Leadsinteractive') {
+    centerNameFilter = "Leadsinteractive";
+} else if (center === 'Both') {
+    centerNameFilter = ["Shark", "Fortune"];
+}
+
 
     // Set dialerFilter based on dialer input
-    if (dialer === 'telcast') {
-        dialerFilter = "telcast";
-    } else if (dialer === 'phdialer') {
-        dialerFilter = "phdialer";
-    } else if (dialer === 'Both') {
-        dialerFilter = ["telcast", "phdialer"];
-    }
+if (dialer === 'telcast') {
+    dialerFilter = "telcast";
+} else if (dialer === 'phdialer') {
+    dialerFilter = "phdialer";
+} else if (dialer === 'ccs') {
+    dialerFilter = "ccs";
+} else if (dialer === 'Both') {
+    dialerFilter = ["telcast", "phdialer"];
+}
 
     // Debugging - console logs
    // console.log('Center Name Filter:', centerNameFilter);
@@ -552,6 +566,8 @@ app.post('/api/agentPerformance', async (req, res) => {
             matchCondition.provider = { $in: ["telcast"] };
         } else if (dialer === 'phdialer') {
             matchCondition.provider = { $in: ["phdialer"] };
+        }else if (dialer === 'ccs') {
+            matchCondition.provider = { $in: ["ccs"] };
         }
     }
 

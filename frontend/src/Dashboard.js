@@ -175,6 +175,7 @@ const Dashboard = () => {
                 {Loggedin_centerName === 'both' && <MenuItem value="">Center</MenuItem>}
                 {Loggedin_centerName === 'both' && <MenuItem value="Shark">Shark</MenuItem>}
                 {Loggedin_centerName === 'both' && <MenuItem value="Fortune">Fortune</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="Leadsinteractive">Leadsinteractive</MenuItem>}
 
                 {Loggedin_centerName === 'Shark' && <MenuItem value="">Center</MenuItem>}
                 {Loggedin_centerName === 'Shark' && <MenuItem value="Shark">Shark</MenuItem>}
@@ -194,6 +195,7 @@ const Dashboard = () => {
                 {Loggedin_centerName === 'both' && <MenuItem value="">Dialer</MenuItem>}
                 {Loggedin_centerName === 'both' && <MenuItem value="telcast">Telcast</MenuItem>}
                 {Loggedin_centerName === 'both' && <MenuItem value="phdialer">Phdialer</MenuItem>}
+                {Loggedin_centerName === 'both' && <MenuItem value="ccs">CCS</MenuItem>}
                 {Loggedin_centerName === 'both' && <MenuItem value="Both">Both</MenuItem>} 
 
                 {Loggedin_centerName === 'Shark' && <MenuItem value="">Dialer</MenuItem>}

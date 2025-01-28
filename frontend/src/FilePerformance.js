@@ -238,6 +238,8 @@ const FilePerformance = () => {
                         <option value="Jared7">Jared7</option>
                         <option value="Jared8">Jared8</option>
                         <option value="Jared9">Jared9</option>
+                        <option value="IQAutoInsurance">IQAutoInsurance</option>
+                        <option value="ReverseMortgage">ReverseMortgage</option>
                         {/* <option value="AllJared">All Jared</option> */}
                         <option value="Danish">Danish</option>
                         {/* <option value="AutoInsuranceGold">AutoInsuranceGold</option> */}
