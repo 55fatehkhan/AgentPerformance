@@ -457,9 +457,9 @@ app.post('/api/agentPerformance', async (req, res) => {
                 if (campaign === 'Outbound') {
                     return ["SH_HWG", "SH_HWG2"];
                 } else if (campaign === 'Inbound') {
-                    return ["SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT"];
+                    return ["SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "Inbound_AiCallbacks"];
                 } else if (campaign === 'Both') {
-                    return ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT"];
+                    return ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "Inbound_AiCallbacks"];
                 }
             } else if (dialer === 'phdialer') {
                 if (campaign === 'Outbound') {
@@ -473,9 +473,9 @@ app.post('/api/agentPerformance', async (req, res) => {
                 if (campaign === 'Outbound') {
                     return ["SH_HWG", "SH_HWG2", "HW", "HW_2"];
                 } else if (campaign === 'Inbound') {
-                    return ["SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "CallerID", "INBOUNDH", "HWXFER"];
+                    return ["SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "CallerID", "INBOUNDH", "HWXFER", "Inbound_AiCallbacks"];
                 } else if (campaign === 'Both') {
-                    return ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "HW", "HW_2", "CallerID", "INBOUNDH", "HWXFER"];
+                    return ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "HW", "HW_2", "CallerID", "INBOUNDH", "HWXFER", "Inbound_AiCallbacks"];
                 }
             }
         } else if (center === 'Fortune') {

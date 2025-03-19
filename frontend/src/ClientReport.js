@@ -206,6 +206,11 @@ const ClientReport = () => {
         multiple // multiple values
     >
      <option value="">Choose</option>
+     <option value="March-2025">March-2025</option>
+     <option value="February-2025">February-2025</option>
+     <option value="January-2025">January-2025</option>
+     <option value="December-2024">December-2024</option>
+     <option value="November-2024">November-2024</option>
      <option value="October-2024">October-2024</option>
      <option value="September-2024">September-2024</option>
      <option value="Aug-24">Aug-24</option>
@@ -230,6 +235,16 @@ const ClientReport = () => {
         multiple
     >
      <option value="">Choose</option>
+     <option value="Second_Half_March_2025">Second_Half_March_2025</option>
+     <option value="First_Half_March_2025">First_Half_March_2025</option>
+     <option value="Second_Half_Feb_2025">Second_Half_Feb_2025</option>
+     <option value="First_Half_Feb_2025">First_Half_Feb_2025</option>
+     <option value="Second_Half_Jan_2025">Second_Half_Jan_2025</option>
+     <option value="First_Half_Jan_2025">First_Half_Jan_2025</option>
+     <option value="Second_Half_Dec_2024">Second_Half_Dec_2024</option>
+     <option value="First_Half_Dec_2024">First_Half_Dec_2024</option>
+     <option value="Second_Half_Nov_2024">Second_Half_Nov_2024</option>
+     <option value="First_Half_Nov_2024">First_Half_Nov_2024</option>
      <option value="Second_Half_Oct_2024">Second_Half_Oct_2024</option>
      <option value="First_Half_Oct_2024">First_Half_Oct_2024</option>
      <option value="Second_Half_Sept_2024">Second_Half_Sept_2024</option>

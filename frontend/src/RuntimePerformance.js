@@ -151,6 +151,7 @@ const RuntimePerformance = () => {
                             {Loggedin_centerName === 'both' && <option value="">Select Center</option>}
                             {Loggedin_centerName === 'both' && <option value="Shark">Shark</option>}
                             {Loggedin_centerName === 'both' && <option value="Fortune">Fortune</option>}
+                            {Loggedin_centerName === 'both' && <option value="Leadsinteractive">Leads</option>}
                             {Loggedin_centerName === 'both' && <option value="Both">Both</option>}
 
                             {Loggedin_centerName === 'Shark' && <option value="">Select Center</option>}
@@ -172,6 +173,7 @@ const RuntimePerformance = () => {
                             {Loggedin_centerName === 'both' && <option value="">Dialer</option>}
                             {Loggedin_centerName === 'both' && <option value="telcast">Telcast</option>}
                             {Loggedin_centerName === 'both' && <option value="phdialer">Phdialer</option>}
+                            {Loggedin_centerName === 'both' && <option value="ccs">CCS</option>}
                             {Loggedin_centerName === 'both' && <option value="Both">Both</option>}
 
                             {Loggedin_centerName === 'Shark' && <option value="">Dialer</option>}
