@@ -589,7 +589,7 @@ if (dialer === 'telcast') {
                                     "CALLBK", "CB", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER",
                                     "B", "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP",
                                     "SC", "SOD", "Xferh", "LB", "HO", "AFTHRS", "BN", "DROP", "INXFER", "LB", 
-                                    "NHO", "WN", "XFER"
+                                    "TEST", "TIMEOT"
                                 ]
                             ]
                         },
@@ -776,9 +776,9 @@ app.post('/api/filePerformance', async (req, res) => {
        if (campaign === 'Outbound') {
            campaignValues = ["SH_HWG", "SH_HWG2"];
        } else if (campaign === 'Inbound') {
-           campaignValues = ["SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT"];
+           campaignValues = ["SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "Inbound_AiCallbacks"];
        } else if (campaign === 'Both') {
-           campaignValues = ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT"];
+           campaignValues = ["SH_HWG", "SH_HWG2", "SH_INBOUND", "SH_Inbound_Callbacks2", "SH_Inbound_Callbacks", "AGENTDIRECT", "Inbound_AiCallbacks"];
        }
    } else if (center === 'Shark' && dialer === 'phdialer') {
        if (campaign === 'Outbound') {
@@ -868,10 +868,10 @@ if (dataset !== null && dataset !== undefined && !isNaN(dataset)) {
                                     $in: [
                                         "$status",
                                         [
-                                            "CALLBK", "CB", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER", "B",
-                                            "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP", "SC", "SOD",
-                                            "Xferh", "LB", "HO", "AFTHRS", "BN", "B", "DROP", "DROP", "INXFER", "LB",
-                                            "NHO", "WN", "XFER"
+                                            "CALLBK", "CB", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER",
+                                            "B", "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP",
+                                            "SC", "SOD", "Xferh", "LB", "HO", "AFTHRS", "BN", "DROP", "INXFER", "LB", 
+                                            "TEST", "TIMEOT"
                                         ]
                                     ]
                                 },
@@ -888,10 +888,10 @@ if (dataset !== null && dataset !== undefined && !isNaN(dataset)) {
                                         $in: [
                                             "$status",
                                             [
-                                                "CALLBK", "CB", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER", "B",
-                                                "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP", "SC", "SOD",
-                                                "Xferh", "LB", "HO", "AFTHRS", "BN", "B", "DROP", "DROP", "INXFER", "LB",
-                                                "NHO", "WN", "XFER"
+                                                "CALLBK", "CB", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER",
+                                                "B", "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP",
+                                                "SC", "SOD", "Xferh", "LB", "HO", "AFTHRS", "BN", "DROP", "INXFER", "LB", 
+                                                "TEST", "TIMEOT"
                                             ]
                                         ]
                                     }
