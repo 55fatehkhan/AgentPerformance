@@ -79,7 +79,12 @@ const Contact = mongoose.model('contact', contactSchema);
 const threeWaySchema = new mongoose.Schema({
     phone: String,
     reportDate: Date,
-    duration: Number
+    duration: Number,
+    date: Date,
+    provider: String,
+    center: String,
+    campaign: String
+
 });
 const ThreeWayReport = mongoose.model('threewayreport', threeWaySchema);
 
@@ -93,103 +98,231 @@ const voipCostSchema = new mongoose.Schema({
 
 const VoipCost = mongoose.model('voipcost', voipCostSchema);
 
-// clientReport
-app.post('/api/clientReport', async (req, res) => {
+// Define the schema and model for MongoDB collection AgentSaleReport Inbound Vs Outbound
+
+const agentSaleSchema = new mongoose.Schema({
+    date: { type: Date, required: true },
+    provider: { type: String, required: true },
+    center: { type: String, required: true },
+    campaign: {type: String, required: true}
+});
+
+const Paidlead = mongoose.model('paidlead', agentSaleSchema);
+
+// Function to get campaign IDs based on center name, provider, and campaign type
+const getCampaignIds = (center, provider, campaign) => {
+    if (center === 'Shark') {
+        if (provider === 'telcast') {
+            if (campaign === 'Outbound') return ["SH_HomeWarrantyGold", "SH_HomeWarrantyGold ", "SH_HomeWarrantyGold2", "SH_HomeWarrantyGold2 ", "Shark_HomeWarrantyGold "];
+            if (campaign === 'Inbound') return ["Inbound Campaign", "Inbound Inbound Campaign "];
+            if (campaign === 'Both') return ["SH_HomeWarrantyGold", "SH_HomeWarrantyGold ", "SH_HomeWarrantyGold2", "SH_HomeWarrantyGold2 ", "Shark_HomeWarrantyGold ", "Inbound Campaign", "Inbound Inbound Campaign "];
+        } else if (provider === 'phdialer') {
+            if (campaign === 'Outbound') return ["HW", "HW_2"];
+            if (campaign === 'Inbound') return ["CallerID", "INBOUNDH", "HWXFER"];
+            if (campaign === 'Both') return ["HW", "HW_2", "CallerID", "INBOUNDH", "HWXFER"];
+        } else if (provider === 'Both') {
+            if (campaign === 'Outbound') return ["SH_HomeWarrantyGold", "SH_HomeWarrantyGold ", "SH_HomeWarrantyGold2", "SH_HomeWarrantyGold2 ", "Shark_HomeWarrantyGold ", "HW", "HW_2"];
+            if (campaign === 'Inbound') return ["Inbound Campaign", "Inbound Inbound Campaign ", "CallerID", "INBOUNDH", "HWXFER"];
+            if (campaign === 'Both') return ["SH_HomeWarrantyGold", "SH_HomeWarrantyGold ", "SH_HomeWarrantyGold2", "SH_HomeWarrantyGold2 ", "Shark_HomeWarrantyGold ", "HW", "HW_2", "Inbound Campaign", "Inbound Inbound Campaign ", "CallerID", "INBOUNDH", "HWXFER" ];
+        }
+    } else if (center === 'Fortune') {
+        if (provider === 'telcast') {
+            if (campaign === 'Outbound') return ["FORTUNE_JARED", "FORTUNE_JARED ", "FT_HomeWarranty", "FT_HomeWarranty "];
+            if (campaign === 'Inbound') return ["FT_Inbound_CB ", "Inbound Campaign", "Inbound Campaign "];
+            if (campaign === 'Both') return ["FORTUNE_JARED", "FORTUNE_JARED ", "FT_HomeWarranty", "FT_HomeWarranty ", "FT_Inbound_CB ", "Inbound Campaign", "Inbound Campaign "];
+        }
+    } 
+    return [];
+};
+
+// Agent Sale Report API
+app.post('/api/AgentSaleReport', async (req, res) => {
     try {
-        const { centerName, provider, fromDate, toDate, Month, BiweeklyDate } = req.body;
-        //console.log("Received from frontend:", { centerName, provider, fromDate, toDate, Month, BiweeklyDate });
+       // console.log('Raw request body:', req.body); // Debugging raw body
+        const { centerName, provider, fromDate, toDate, campaign } = req.body;
 
+       // console.log('Received values:', { centerName, provider, fromDate, toDate, campaign });
 
-        const matchConditions = {};
-        
-       // Handle centerName (single or multiple values)
-       if (centerName) {
-        if (Array.isArray(centerName)) {
-            matchConditions['Center'] = { $in: centerName }; // For multiple center names
-        } else {
-            matchConditions['Center'] = centerName; // For a single center name
+        // Get dynamic campaign IDs based on input filters
+        const campaignIds = getCampaignIds(centerName, provider, campaign);
+
+        if (campaignIds.length === 0) {
+            return res.status(400).json({ error: 'Invalid selection for campaign filtering' });
         }
-    }
-    
-    // Handle provider (single or multiple values)
-    if (provider) {
-        if (Array.isArray(provider)) {
-            matchConditions['campaign2'] = { $in: provider }; // For multiple providers
-        } else {
-            matchConditions['campaign2'] = provider; // For a single provider
-        }
-    }
 
-    // Handle Transfer Date (fromDate and toDate must both be provided)
-    if (fromDate && toDate) {
-        matchConditions['Transfer Date'] = {
-            $gte: new Date(fromDate),
-            $lte: new Date(toDate)
+        // Match conditions based on user input
+        const matchConditions = {
+            centerName: centerName,
+            provider: provider,
+            reportDate: {
+                $gte: new Date(fromDate),
+                $lte: new Date(toDate)
+            },
+            campaign: { $in: campaignIds }
         };
-    }
 
-    // Handle Month (single or multiple values)
-    if (Month) {
-        if (Array.isArray(Month)) {
-            matchConditions['Month'] = { $in: Month }; // For multiple months
-        } else {
-            matchConditions['Month'] = Month; // For a single month
-        }
-    }
+         // Log the final match condition
+        // console.log('Final match condition:', JSON.stringify(matchConditions, null, 2));
 
-    // Handle BiweeklyDate (single or multiple values)
-    if (BiweeklyDate) {
-        if (Array.isArray(BiweeklyDate)) {
-            matchConditions['Date'] = { $in: BiweeklyDate }; // For multiple Biweekly dates
-        } else {
-            matchConditions['Date'] = BiweeklyDate; // For a single Biweekly date
-        }
-    }
-
-        //match condition for debug
-        //console.log("Final match conditions:", matchConditions);
-
+        // Aggregation pipeline
         const pipeline = [
-            {
-                $match: matchConditions
-            },
-            {
-                $lookup: {
-                    from: "contacts", 
-                    localField: "phone",  
-                    foreignField: "phone", 
-                    as: "contactDetails"  
-                }
-            },
-            {
-                $unwind: "$contactDetails"
-            },
+            { $match: matchConditions },
             {
                 $group: {
                     _id: {
-                        status: "$status",
-                        dataset: "$contactDetails.dataset",
-                        listId: "$contactDetails.listId",
-                        centerName: "$contactDetails.centerName"
+                        full_name: "$full_name",
+                        phone: "$phone"
                     },
-                    count: { $sum: 1 }
+                    records: {
+                        $push: "$$ROOT"
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    records: {
+                        $sortArray: {
+                            input: "$records",
+                            sortBy: { duration: -1 }
+                        }
+                    }
+                }
+            },
+            {
+                $set: {
+                    paid: { $arrayElemAt: ["$records", 0] }
+                }
+            },
+            {
+                $set: {
+                    paid: {
+                        $cond: {
+                            if: { $gte: ["$paid.duration", 100] },
+                            then: 1,
+                            else: "$$REMOVE"
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    transfer: { $size: "$records" }
+                }
+            },
+            {
+                $addFields: {
+                    agent: "$_id.full_name"
+                }
+            },
+            {
+                $group: {
+                    _id: "$agent",
+                    totalAttempts: { $sum: "$transfer" },
+                    totalPaid: { $sum: "$paid" }
                 }
             },
             {
                 $project: {
-                    status: "$_id.status",
-                    dataset: "$_id.dataset",
-                    listId: "$_id.listId",
-                    centerName: "$_id.centerName",
-                    count: 1,
+                    agent: "$_id",
+                    totalAttempts: 1,
+                    totalPaid: 1,
                     _id: 0
                 }
-            },
-            {
-                $sort: { status: 1, count: -1 }
             }
         ];
-        const results = await ClientReport.aggregate(pipeline);
+
+        const results = await ThreeWayReport.aggregate(pipeline);
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error running aggregation:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+//POST to CLIENT method, leads posting for Retell RealTime Leads by Carlos
+app.post('/post-to-client', async (req, res) => {
+    try {
+        const { firstName, lastName, address, city, state, postalCode, phone, email } = req.body;
+
+        if (!firstName || !lastName || !address || !city || !state || !postalCode || !phone || !email) {
+            return res.status(400).json({ success: false, message: 'All fields are required' });
+        }
+
+        // Construct API URL https://choicehomewarranty.com
+        let url = `https://testthomewarranty.com/host-post.php?NETWORKID=sclPT&AFID=afid&FirstName=${encodeURIComponent(firstName)}&LastName=${encodeURIComponent(lastName)}&Address=${encodeURIComponent(address)}&City=${encodeURIComponent(city)}&State=${encodeURIComponent(state)}&PostalCode=${encodeURIComponent(postalCode)}&Phone=${encodeURIComponent(phone)}&Email=${encodeURIComponent(email)}&IPAddress=208.109.184.203&_OwnHome=Yes&_optin=Yes&Team=b`;
+
+        // Send request to client API
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const responseData = await response.text(); // Get API response as text
+
+        return res.status(200).json({ success: true, message: 'Data posted successfully', data: responseData });
+
+    } catch (error) {
+        console.error('Error posting to client:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+
+// clientReport
+app.post('/api/clientReport', async (req, res) => {
+    try {
+        const { centerName, provider, Month, BiweeklyDate } = req.body;
+      //  console.log("Received from frontend:", { centerName, provider, Month, BiweeklyDate });
+
+
+        const matchConditions = {};
+        
+       // Handle `centerName`
+       if (centerName) {
+        matchConditions['Center'] = Array.isArray(centerName) ? { $in: centerName } : centerName;
+    }
+
+    // Handle `provider`
+    if (provider) {
+        matchConditions['campaign2'] = Array.isArray(provider) ? { $in: provider } : provider;
+    }
+
+    // Handle `Month`
+    if (Month) {
+        matchConditions['Month'] = Array.isArray(Month) ? { $in: Month } : Month;
+    }
+
+    // Handle `BiweeklyDate`
+    if (BiweeklyDate) {
+        matchConditions['Date'] = Array.isArray(BiweeklyDate) ? { $in: BiweeklyDate } : BiweeklyDate;
+    }
+
+    // Debugging: Log the final match conditions
+   // console.log("Final match conditions:", JSON.stringify(matchConditions, null, 2));
+
+    // **MongoDB Aggregation Query**
+    const aggregationPipeline = [
+        { $match: matchConditions },
+        {
+            $project: {
+                phone: 1,
+                status: 1,
+                Date: 1,
+                Month: 1,
+                Outbound: 1,
+                Source: 1,
+                Center: 1,
+                Duration: 1,
+                campaign2: 1,
+                "Transfer Date": 1,
+                "SouceBackup/ListId": 1
+            }
+        }
+    ];
+
+        const results = await ClientReport.aggregate(aggregationPipeline);
         // console.log("Aggregated results:", results);
 
         res.status(200).json(results);

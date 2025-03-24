@@ -14,8 +14,6 @@ const ClientReport = () => {
     const [filters, setFilters] = useState({
         centerName: '',
         provider: '',
-        fromDate: '',
-        toDate: '',
         Month: '',
         BiweeklyDate: ''
     });
@@ -81,8 +79,6 @@ const ClientReport = () => {
         setFilters({
             centerName: '',
             provider: '',
-            fromDate: '',
-            toDate: '',
             Month: '',
             BiweeklyDate: ''
         });
@@ -110,11 +106,17 @@ const ClientReport = () => {
 
     const columns = [
         
-        { field: 'listId', headerName: 'Data Type', width: 150 },
-        { field: 'count', headerName: 'Total Count', width: 150 },
+        { field: 'phone', headerName: 'Phone', width: 150 },
         { field: 'status', headerName: 'Status', width: 150 },
-        { field: 'dataset', headerName: 'Dataset', width: 150 },
-        { field: 'centerName', headerName: 'Center Name', width: 150 }
+        { field: 'Date', headerName: 'Date Range' , width: 150 },
+        { field: 'Month', headerName: 'Month', width: 150 },
+        { field: 'Outbound', headerName: 'Campaign', width: 150 },
+        { field: 'Source', headerName: 'ListId', width: 150 },
+        { field: 'Center', headerName: 'Center Name', width: 150 },
+        { field: 'Duration', headerName: 'Duration', width: 150 },
+        { field: 'campaign2', headerName: 'Provider', width: 150 },
+        { field: 'Transfer Date', headerName: 'TransferDate', width: 150 },
+        { field: 'SouceBackup/ListId', headerName: 'DataType', width: 150 }
     ];
 
     return (
@@ -129,26 +131,8 @@ const ClientReport = () => {
             <div className="filter-section">
                 <form onSubmit={handleSubmit} className="filter-form">
                     <div className="filter-row">
-                        <div className="filter-field">
-                            <label htmlFor="fromDate">From Date</label>
-                            <input
-                                type="date"
-                                id="fromDate"
-                                name="fromDate"
-                                value={filters.fromDate}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="filter-field">
-                            <label htmlFor="toDate">To Date</label>
-                            <input
-                                type="date"
-                                id="toDate"
-                                name="toDate"
-                                value={filters.toDate}
-                                onChange={handleInputChange}
-                            />
-                        </div>
+                     
+                    
                         <div className="filter-field">
     <label htmlFor="centerName">Center Name</label>
     <select
@@ -206,21 +190,21 @@ const ClientReport = () => {
         multiple // multiple values
     >
      <option value="">Choose</option>
-     <option value="March-2025">March-2025</option>
-     <option value="February-2025">February-2025</option>
-     <option value="January-2025">January-2025</option>
-     <option value="December-2024">December-2024</option>
-     <option value="November-2024">November-2024</option>
-     <option value="October-2024">October-2024</option>
-     <option value="September-2024">September-2024</option>
-     <option value="Aug-24">Aug-24</option>
+     <option value="Mar-25">Mar-25</option>
+     <option value="Feb-25">Feb-25</option>
+     <option value="Jan-25">Jan-25</option>
+     <option value="Dec-24">Dec-24</option>
+     <option value="Nov-24">Nov-24</option>
+     <option value="Oct-24">Oct-24</option>
+     <option value="Sep-24">Sep-24</option>
+     {/* <option value="Aug-24">Aug-24</option>
      <option value="Jul-24">Jul-24</option>
      <option value="Jun-24">Jun-24</option>
      <option value="May-24">May-24</option>
      <option value="Apr-24">Apr-24</option>
      <option value="Mar-24">Mar-24</option>
      <option value="Feb-24">Feb-24</option>
-     <option value="Jan-24">Jan-24</option>
+     <option value="Jan-24">Jan-24</option> */}
 
     </select>
 </div>
@@ -249,14 +233,14 @@ const ClientReport = () => {
      <option value="First_Half_Oct_2024">First_Half_Oct_2024</option>
      <option value="Second_Half_Sept_2024">Second_Half_Sept_2024</option>
      <option value="First_Half_Sept_2024">First_Half_Sept_2024</option>
-     <option value="Second_Half_Aug_2024">Second_Half_Aug_2024</option>
+     {/* <option value="Second_Half_Aug_2024">Second_Half_Aug_2024</option>
      <option value="First_Half_Aug_2024">First_Half_Aug_2024</option>
      <option value="Second_Half_July_2024">Second_Half_July_2024</option>
      <option value="First_Half_July_2024">First_Half_July_2024</option>
      <option value="Second_Half_June_2024">Second_Half_June_2024</option>
      <option value="First_Half_June_2024">First_Half_June_2024</option>
      <option value="Second_Half_May_2024">Second_Half_May_2024</option>
-     <option value="First_Half_May_2024">First_Half_May_2024</option>
+     <option value="First_Half_May_2024">First_Half_May_2024</option> */}
     </select>
 </div>
 

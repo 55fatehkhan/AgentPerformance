@@ -6,6 +6,7 @@
 .card-container {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap; /* Allows wrapping on smaller screens */
     gap: 20px;
     margin-top: 20px;
 }
@@ -17,17 +18,38 @@
     width: 250px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     cursor: pointer;
-    transition: box-shadow 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    background-color: #fff;
 }
 
 .card:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px); /* Adds a subtle lift effect */
 }
 
 .card h2 {
     margin-bottom: 10px;
+    font-size: 18px;
 }
 
 .card p {
     color: #666;
+    font-size: 14px;
+}
+
+.restricted-card {
+    background-color: #ffcccc; /* Light red to indicate restricted access */
+    border: 2px solid #ff0000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card-container {
+        flex-direction: column; /* Stack cards vertically on smaller screens */
+        align-items: center;
+    }
+
+    .card {
+        width: 90%; /* Allow cards to take most of the width on smaller screens */
+    }
 }

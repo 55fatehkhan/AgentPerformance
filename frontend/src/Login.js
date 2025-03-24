@@ -8,24 +8,6 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
-    // const users = {
-    //     Faiyaz: {
-    //         password: 'faiyazstl@123',
-    //         role: 'admin',
-    //         center: 'both'
-    //     },
-    //     Shark: {
-    //         password: 'Sharkstl@123',
-    //         role: 'user',
-    //         center: 'Shark'
-    //     },
-    //     Fortune: {
-    //         password: 'Fortunestl@123',
-    //         role: 'user',
-    //         center: 'Fortune'
-    //     }
-    // };
-
     const handleLogin = async (e) => {
         e.preventDefault();
 

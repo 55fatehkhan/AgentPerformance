@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SessionSelection.css';
 
 const SessionSelection = () => {
     const navigate = useNavigate();
+
+    // Fetch values from session storage
+    const [role, setRole] = useState('');
+    const [centerName, setCenterName] = useState('');
+
+    useEffect(() => {
+        setRole(sessionStorage.getItem('role'));
+        setCenterName(sessionStorage.getItem('centerName'));
+    }, []);
 
     const goToDashboard = () => {
         navigate('/Dashboard');
@@ -25,6 +34,12 @@ const SessionSelection = () => {
     };
     const goToThreeWayReport = () => {
         navigate('/ThreeWayReport'); 
+    };
+    const goToAgentSaleReport = () => {
+        navigate('/AgentSaleReport'); 
+    };
+    const goToClientPostingRetell = () => {
+        navigate('/RetellClientPosting'); 
     };
 
     return (
@@ -55,6 +70,20 @@ const SessionSelection = () => {
                     <h2>Threeway Report</h2>
                     <p>Threeway Report for analysis</p>
                 </div>
+                <div className="card" onClick={goToAgentSaleReport}>
+                    <h2>Agents Wise Sale, Inbound Vs Outbound</h2>
+                    <p>Agent Wise sale, Center wise or Campaign wise</p>
+                </div>
+
+
+  {/* Conditionally Render Client Posting Section */}
+                {(role === 'QC' && centerName === 'both') && (
+                    <div className="card restricted-card" onClick={goToClientPostingRetell}>
+                        <h2>ONLY FOR CARLOS: Client Posting</h2>
+                        <p>Disclaimer: ONLY FOR CARLOS and his QC Team. You can post leads to the client after verification, like listening to recordings, etc.</p>
+                    </div>
+                )}
+
             </div>
         </div>
     );

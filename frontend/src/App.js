@@ -8,6 +8,8 @@ import RuntimePerformance from './RuntimePerformance';
 import VoipCost from './VoipCost';
 import ClientReport from './ClientReport';
 import ThreeWayReport from './ThreeWayReport';
+import AgentSaleReport from './AgentSaleReport';
+import RetellClientPosting from './RetellClientPosting';
 
 
 function App() {
@@ -22,6 +24,8 @@ function App() {
                 <Route path="/VoipCost" element={<VoipCost />} /> 
                 <Route path="/ClientReport" element={<ClientReport />} />
                 <Route path="/ThreeWayReport" element={<ThreeWayReport />} />  
+                <Route path="/AgentSaleReport" element={<AgentSaleReport />} />  
+                <Route path="/RetellClientPosting" element={<RetellClientPosting />} /> 
             </Routes>
         </Router>
     );
