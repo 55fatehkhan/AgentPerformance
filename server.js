@@ -247,9 +247,10 @@ app.post('/post-to-client', async (req, res) => {
         if (!firstName || !lastName || !address || !city || !state || !postalCode || !phone || !email) {
             return res.status(400).json({ success: false, message: 'All fields are required' });
         }
+       // console.log(firstName, lastName, phone, email);
 
         // Construct API URL https://choicehomewarranty.com
-        let url = `https://testthomewarranty.com/host-post.php?NETWORKID=sclPT&AFID=afid&FirstName=${encodeURIComponent(firstName)}&LastName=${encodeURIComponent(lastName)}&Address=${encodeURIComponent(address)}&City=${encodeURIComponent(city)}&State=${encodeURIComponent(state)}&PostalCode=${encodeURIComponent(postalCode)}&Phone=${encodeURIComponent(phone)}&Email=${encodeURIComponent(email)}&IPAddress=208.109.184.203&_OwnHome=Yes&_optin=Yes&Team=b`;
+        let url = `https://choicehomewarranty.com/host-post.php?NETWORKID=sclPT&AFID=blindxfer&FirstName=${encodeURIComponent(firstName)}&LastName=${encodeURIComponent(lastName)}&Address=${encodeURIComponent(address)}&City=${encodeURIComponent(city)}&State=${encodeURIComponent(state)}&PostalCode=${encodeURIComponent(postalCode)}&Phone=${encodeURIComponent(phone)}&Email=${encodeURIComponent(email)}&IPAddress=208.109.184.203&_OwnHome=Yes&_optin=Yes&Team=b`;
 
         // Send request to client API
         const response = await fetch(url, {
@@ -260,6 +261,7 @@ app.post('/post-to-client', async (req, res) => {
         });
 
         const responseData = await response.text(); // Get API response as text
+        console.log("Response Data: ", responseData);
 
         return res.status(200).json({ success: true, message: 'Data posted successfully', data: responseData });
 

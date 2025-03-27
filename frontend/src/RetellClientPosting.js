@@ -28,7 +28,7 @@ const RetellClientPosting = () => {
         console.log('Form Data Submitted:', formData);
         // Later, we'll send this data to the server via API call
         try {
-            const response = await fetch('http://localhost:5000/post-to-client', {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/post-to-client`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
