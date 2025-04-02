@@ -148,7 +148,7 @@ const getCampaignIds = (center, provider, campaign) => {
 // Retell Call logs Report API
 app.post('/api/RetellCallLogs', async (req, res) => {
     const { direction, duration, fromDate, toDate, call_disposition, disconnect_reason } = req.body;
-    console.log(direction, duration, fromDate, toDate, call_disposition, disconnect_reason);
+  //  console.log(direction, duration, fromDate, toDate, call_disposition, disconnect_reason);
 
     // Helper function to ensure all inputs are arrays where necessary
     const ensureArray = input => Array.isArray(input) ? input : input ? [input] : [];
@@ -166,7 +166,12 @@ app.post('/api/RetellCallLogs', async (req, res) => {
         duration_second: { $gte: Number(duration) || 0 }
     };
 
-    if (call_disposition) {
+    // if (call_disposition) {
+    //     matchConditions2["retellCallAnalysedLogs.call_analysis.custom_analysis_data.call_disposition"] = { $in: ensureArray(call_disposition) };
+    // }
+
+     // Only add disposition condition if 'All' is not selected
+     if (call_disposition && !call_disposition.includes("All")) {
         matchConditions2["retellCallAnalysedLogs.call_analysis.custom_analysis_data.call_disposition"] = { $in: ensureArray(call_disposition) };
     }
 
@@ -197,7 +202,7 @@ app.post('/api/RetellCallLogs', async (req, res) => {
             disconnect_reason: { $ifNull: ["$retellCallAnalysedLogs.disconnection_reason", ""] },
             call_cost: { $divide: ["$retellCallAnalysedLogs.call_cost.combined_cost", 100] },
             call_disposition: "$retellCallAnalysedLogs.call_analysis.custom_analysis_data.call_disposition",
-            call_id: "$retellCallAnalysedLogs.call_id",
+            //call_id: "$retellCallAnalysedLogs.call_id",
             latency: "$retellCallAnalysedLogs.latency.e2e.p50",
             LeadsGetsDateTime: 1
         }}

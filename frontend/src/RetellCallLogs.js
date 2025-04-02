@@ -35,13 +35,28 @@ const RetellCallLogs = () => {
         }
     }, [Loggedin_centerName]);
 
+    // const handleInputChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setFilters({
+    //         ...filters,
+    //         [name]: value,
+    //     });
+    // };
+
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const { name, options } = e.target;
+        let value = [];
+        if (e.target.multiple) {
+            value = [...options].filter(option => option.selected).map(option => option.value);
+        } else {
+            value = e.target.value;
+        }
         setFilters({
             ...filters,
             [name]: value,
         });
     };
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -66,20 +81,34 @@ const RetellCallLogs = () => {
         }
     };
 
+    // const handleReset = () => {
+    //     setFilters({
+
+    //     direction: '',
+    //     duration: '',
+    //     call_disposition: '',
+    //     disconnect_reason: '',
+    //     fromDate: '',
+    //     toDate: ''
+
+    //     });
+    //     setData([]);
+    //     setIsSubmitted(false);
+    // };
+
     const handleReset = () => {
         setFilters({
-
-        direction: '',
-        duration: '',
-        call_disposition: '',
-        disconnect_reason: '',
-        fromDate: '',
-        toDate: ''
-
+            direction: [],
+            duration: '',
+            call_disposition: [],
+            disconnect_reason: [],
+            fromDate: '',
+            toDate: ''
         });
         setData([]);
         setIsSubmitted(false);
     };
+    
 
     const convertToCSV = (arr) => {
         if (arr.length === 0) return '';
@@ -107,9 +136,9 @@ const RetellCallLogs = () => {
         { field: 'recording_url', headerName: 'Recording', width: 150 },
         { field: 'disconnect_reason', headerName: 'DisconnectReason', width: 150 },
         { field: 'call_cost', headerName: 'CallCost', width: 150 },
+       // { field: 'call_id', headerName: 'CallId', width: 150 },
         { field: 'call_disposition', headerName: 'Disposition', width: 150 },
         { field: 'LeadsGetsDateTime', headerName: 'LeadsGetsDateTime', width: 150 },
-        { field: 'call_id', headerName: 'CallId', width: 150 },
         { field: 'latency', headerName: 'Latency', width: 150 },
     ];
 
@@ -149,6 +178,7 @@ const RetellCallLogs = () => {
                         <div className="filter-field">
                             <label htmlFor="direction">Direction</label>
                             <select
+                                multiple
                                 id="direction"
                                 name="direction"
                                 value={filters.direction}
@@ -164,6 +194,7 @@ const RetellCallLogs = () => {
                         <div className="filter-field">
                             <label htmlFor="call_disposition">Disposition</label>
                             <select
+                                multiple
                                 id="call_disposition"
                                 name="call_disposition"
                                 value={filters.call_disposition}
@@ -180,13 +211,14 @@ const RetellCallLogs = () => {
                                 <option value="NHO">NHO</option>
                                 <option value="WN">WN</option>
                                 <option value="XFER">XFER</option>
-                            
+                                <option value="All">All</option>
                             </select>
                         </div>
 
                         <div className="filter-field">
                             <label htmlFor="disconnect_reason">Disconnect Reason</label>
                             <select
+                                multiple
                                 id="disconnect_reason"
                                 name="disconnect_reason"
                                 value={filters.disconnect_reason}
