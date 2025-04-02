@@ -109,6 +109,16 @@ const agentSaleSchema = new mongoose.Schema({
 
 const Paidlead = mongoose.model('paidlead', agentSaleSchema);
 
+const retellcall = new mongoose.Schema({
+    date: { type: Date, required: true },
+    duration: { type: Number },
+    direction: { type: String, required: true },
+    call_disposition: {type: String, required: true},
+    disconnect_reason: {type: String, required: true}
+});
+
+const Realtimelead = mongoose.model('realtimelead', retellcall);
+
 // Function to get campaign IDs based on center name, provider, and campaign type
 const getCampaignIds = (center, provider, campaign) => {
     if (center === 'Shark') {
@@ -134,6 +144,78 @@ const getCampaignIds = (center, provider, campaign) => {
     } 
     return [];
 };
+
+// Retell Call logs Report API
+app.post('/api/RetellCallLogs', async (req, res) => {
+    const { direction, duration, fromDate, toDate, call_disposition, disconnect_reason } = req.body;
+    console.log(direction, duration, fromDate, toDate, call_disposition, disconnect_reason);
+
+    // Helper function to ensure all inputs are arrays where necessary
+    const ensureArray = input => Array.isArray(input) ? input : input ? [input] : [];
+
+    // Construct dynamic match conditions based on user input
+    let matchConditions1 = {
+        dialedAt: {
+            $gte: fromDate ? new Date(fromDate + "T11:30:00Z") : new Date('1970-01-01T11:30:00Z'),
+            $lte: toDate ? new Date(toDate + "T11:30:00Z") : new Date()
+        },
+        "retellCallAnalysedLogs.direction": { $in: ensureArray(direction) || ["inbound", "outbound"] }
+    };
+
+    let matchConditions2 = {
+        duration_second: { $gte: Number(duration) || 0 }
+    };
+
+    if (call_disposition) {
+        matchConditions2["retellCallAnalysedLogs.call_analysis.custom_analysis_data.call_disposition"] = { $in: ensureArray(call_disposition) };
+    }
+
+    if (disconnect_reason) {
+        matchConditions2["retellCallAnalysedLogs.disconnection_reason"] = { $in: ensureArray(disconnect_reason) };
+    }
+
+   // console.log("Matched1:  ", matchConditions1);
+   // console.log("Matched2:  ", matchConditions2);
+
+    const pipeline = [
+        { $unwind: { path: "$retellCallAnalysedLogs", preserveNullAndEmptyArrays: false } },
+        { $addFields: {
+            dialedAt: { $toDate: "$retellCallAnalysedLogs.start_timestamp" },
+            LeadsGetsDateTime: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }
+        }},
+        { $match: matchConditions1 },
+        { $addFields: { duration_second: { $divide: ["$retellCallAnalysedLogs.duration_ms", 1000] } }},
+        { $match: matchConditions2 },
+        { $project: {
+            _id: 0,
+            DialedAt: "$dialedAt",
+            from: { $ifNull: ["$retellCallAnalysedLogs.from_number", ""] },
+            to: { $ifNull: ["$retellCallAnalysedLogs.to_number", ""] },
+            direction: { $ifNull: ["$retellCallAnalysedLogs.direction", ""] },
+            duration_seconds: { $round: [{ $ifNull: [{ $divide: ["$retellCallAnalysedLogs.duration_ms", 1000] }, 0] }, 0] },
+            recording_url: { $ifNull: ["$retellCallAnalysedLogs.recording_url", ""] },
+            disconnect_reason: { $ifNull: ["$retellCallAnalysedLogs.disconnection_reason", ""] },
+            call_cost: { $divide: ["$retellCallAnalysedLogs.call_cost.combined_cost", 100] },
+            call_disposition: "$retellCallAnalysedLogs.call_analysis.custom_analysis_data.call_disposition",
+            call_id: "$retellCallAnalysedLogs.call_id",
+            latency: "$retellCallAnalysedLogs.latency.e2e.p50",
+            LeadsGetsDateTime: 1
+        }}
+    ];
+
+     // console.log('pipeline:  ', pipeline);
+     // console.log(JSON.stringify(pipeline, null, 2));
+
+    try {
+        const results = await Realtimelead.aggregate(pipeline);
+        // console.log('Output: ', results);
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error running aggregation:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 // Agent Sale Report API
 app.post('/api/AgentSaleReport', async (req, res) => {

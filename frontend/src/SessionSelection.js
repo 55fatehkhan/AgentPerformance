@@ -41,6 +41,9 @@ const SessionSelection = () => {
     const goToClientPostingRetell = () => {
         navigate('/RetellClientPosting'); 
     };
+    const goToRetellCallLogs = () => {
+        navigate('/RetellCallLogs'); 
+    };
 
     return (
         <div className="session-selection-container">
@@ -81,6 +84,13 @@ const SessionSelection = () => {
                     <div className="card restricted-card" onClick={goToClientPostingRetell}>
                         <h2>ONLY FOR CARLOS: Client Posting</h2>
                         <p>Disclaimer: ONLY FOR CARLOS and his QC Team. You can post leads to the client after verification, like listening to recordings, etc.</p>
+                    </div>
+                )}
+
+                {(role === 'admin' && centerName === 'both') && (
+                    <div className="card restricted-card" onClick={goToRetellCallLogs}>
+                        <h2>ONLY FOR Internal Team: STL</h2>
+                        <p>Retell Call logs, daily. We can get here every sort of detail of dialing as per required date</p>
                     </div>
                 )}
 

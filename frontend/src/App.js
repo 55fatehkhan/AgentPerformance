@@ -10,6 +10,7 @@ import ClientReport from './ClientReport';
 import ThreeWayReport from './ThreeWayReport';
 import AgentSaleReport from './AgentSaleReport';
 import RetellClientPosting from './RetellClientPosting';
+import RetellCallLogs from './RetellCallLogs';
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/ThreeWayReport" element={<ThreeWayReport />} />  
                 <Route path="/AgentSaleReport" element={<AgentSaleReport />} />  
                 <Route path="/RetellClientPosting" element={<RetellClientPosting />} /> 
+                <Route path="/RetellCallLogs" element={<RetellCallLogs />} /> 
             </Routes>
         </Router>
     );

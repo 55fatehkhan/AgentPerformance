@@ -1,10 +1,10 @@
-import './AgentSaleReport.css';
+import './RetellCallLogs.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Card, CardContent, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
-const AgentSaleReport = () => {
+const RetellCallLogs = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -12,11 +12,12 @@ const AgentSaleReport = () => {
     };
 
     const [filters, setFilters] = useState({
-        centerName: '',
-        provider: '',
+        direction: '',
+        duration: '',
+        call_disposition: '',
+        disconnect_reason: '',
         fromDate: '',
-        toDate: '',
-        campaign: ''
+        toDate: ''
     });
 
     const Loggedin_centerName = sessionStorage.getItem('centerName');
@@ -48,7 +49,7 @@ const AgentSaleReport = () => {
         setIsSubmitted(true);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/AgentSaleReport`, {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellCallLogs`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ const AgentSaleReport = () => {
             const result = await response.json();
             setData(result);
         } catch (error) {
-            console.error('Error fetching agent sale report data:', error);
+            console.error('Error fetching Retell Call logs data:', error);
         } finally {
             setLoading(false);
         }
@@ -67,11 +68,14 @@ const AgentSaleReport = () => {
 
     const handleReset = () => {
         setFilters({
-            centerName: '',
-            provider: '',
-            fromDate: '',
-            toDate: '',
-            campaign: ''
+
+        direction: '',
+        duration: '',
+        call_disposition: '',
+        disconnect_reason: '',
+        fromDate: '',
+        toDate: ''
+
         });
         setData([]);
         setIsSubmitted(false);
@@ -88,22 +92,31 @@ const AgentSaleReport = () => {
         const blob = new Blob([csv], { type: 'text/csv' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', 'agentwiseSale_data.csv');
+        link.setAttribute('download', 'retellCallLogs_data.csv');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
     const columns = [
-        { field: 'agent', headerName: 'Agent Name', width: 200 },
-        { field: 'totalAttempts', headerName: 'Total Attempts', width: 150 },
-        { field: 'totalPaid', headerName: 'Total Paid', width: 150 }
+        { field: 'DialedAt', headerName: 'DialedAt', width: 200 },
+        { field: 'from', headerName: 'From', width: 150 },
+        { field: 'to', headerName: 'To', width: 150 },
+        { field: 'direction', headerName: 'Direction', width: 150 },
+        { field: 'duration_seconds', headerName: 'Duration(s)', width: 150 },
+        { field: 'recording_url', headerName: 'Recording', width: 150 },
+        { field: 'disconnect_reason', headerName: 'DisconnectReason', width: 150 },
+        { field: 'call_cost', headerName: 'CallCost', width: 150 },
+        { field: 'call_disposition', headerName: 'Disposition', width: 150 },
+        { field: 'LeadsGetsDateTime', headerName: 'LeadsGetsDateTime', width: 150 },
+        { field: 'call_id', headerName: 'CallId', width: 150 },
+        { field: 'latency', headerName: 'Latency', width: 150 },
     ];
 
     return (
-        <div className="agentSaleReport-container">
-            <header className="agentSaleReport-header">
-                <h1>Agent Wise Sale Analysis Dashboard</h1>
+        <div className="retellCallReport-container">
+            <header className="retellCallReport-header">
+                <h1>Retell Call Logs Analysis Dashboard</h1>
                 <div className="user-info">
                     <button className="logout-btn" onClick={handleLogout}>Logout 🔒</button>
                 </div>
@@ -134,49 +147,83 @@ const AgentSaleReport = () => {
                         </div>
 
                         <div className="filter-field">
-                            <label htmlFor="campaign">Campaign ID</label>
+                            <label htmlFor="direction">Direction</label>
                             <select
-                                id="campaign"
-                                name="campaign"
-                                value={filters.campaign}
+                                id="direction"
+                                name="direction"
+                                value={filters.direction}
                                 onChange={handleInputChange}
                             >
-                                <option value="">Select Campaign</option>
-                                <option value="Outbound">Outbound</option>
-                                <option value="Inbound">Inbound</option>
-                                <option value="Both">Both</option>
+                                <option value="">Select Direction</option>
+                                <option value="outbound">outbound</option>
+                                <option value="inbound">inbound</option>
+                                {/* <option value="Both">Both</option> */}
                             </select>
                         </div>
 
                         <div className="filter-field">
-                            <label htmlFor="centerName">Center Name</label>
+                            <label htmlFor="call_disposition">Disposition</label>
                             <select
-                                id="centerName"
-                                name="centerName"
-                                value={filters.centerName}
+                                id="call_disposition"
+                                name="call_disposition"
+                                value={filters.call_disposition}
                                 onChange={handleInputChange}
                             >
-                                {Loggedin_centerName === 'both' && <option value="">Select Center</option>}
-                                {Loggedin_centerName === 'both' && <option value="Shark">Shark</option>}
-                                {Loggedin_centerName === 'both' && <option value="Fortune">Fortune</option>}
-                                {Loggedin_centerName === 'Shark' && <option value="Shark">Shark</option>}
-                                {Loggedin_centerName === 'Fortune' && <option value="Fortune">Fortune</option>}
+
+                                <option value="">Disposition</option>
+                                <option value="AA">AA</option>
+                                <option value="ADC">ADC</option>
+                                <option value="CALLBK">CALLBK</option>
+                                <option value="DNC">DNC</option>
+                                <option value="HU">HU</option>
+                                <option value="NA">NA</option>
+                                <option value="NHO">NHO</option>
+                                <option value="WN">WN</option>
+                                <option value="XFER">XFER</option>
+                            
                             </select>
                         </div>
 
                         <div className="filter-field">
-                            <label htmlFor="provider">Dialer</label>
+                            <label htmlFor="disconnect_reason">Disconnect Reason</label>
                             <select
-                                id="provider"
-                                name="provider"
-                                value={filters.provider}
+                                id="disconnect_reason"
+                                name="disconnect_reason"
+                                value={filters.disconnect_reason}
                                 onChange={handleInputChange}
                             >
-                                <option value="">Select Dialer</option>
-                                <option value="telcast">Telcast</option>
-                                <option value="phdialer">Phdialer</option>
+
+                                <option value="">Disconnect Reason</option>
+                                <option value="voicemail_reached">voicemail_reached</option>
+                                <option value="user_hangup">user_hangup</option>
+                                <option value="inactivity">inactivity</option>
+                                <option value="dial_no_answer">dial_no_answer</option>
+                                <option value="dial_failed">dial_failed</option>
+                                <option value="call_transfer">call_transfer</option>
+                                <option value="agent_hangup">agent_hangup</option>
+                            
                             </select>
                         </div>
+
+                        <div className="filter-field">
+                            <label htmlFor="duration">Duration</label>
+                            <select
+                                id="duration"
+                                name="duration"
+                                value={filters.duration}
+                                onChange={handleInputChange}
+                            >
+
+                                <option value="">Duration</option>
+                                <option value="10">Greater than 10 seconds</option>
+                                <option value="30">Greater than 30 seconds</option>
+                                <option value="50">Greater than 50 seconds</option>
+                            
+                            </select>
+                        </div>
+
+
+                      
                     </div>
                     <div className="filter-actions">
                         <button type="submit" className="submit-btn">Submit</button>
@@ -185,7 +232,7 @@ const AgentSaleReport = () => {
                 </form>
             </div>
 
-            <div className="AgentSaleReport-content">
+            <div className="retellCallReport-content">
                 {loading && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
                         <CircularProgress />
@@ -211,8 +258,7 @@ const AgentSaleReport = () => {
                                     rowsPerPageOptions={[10, 20, 50]}
                                     checkboxSelection
                                     disableSelectionOnClick
-                                    getRowId={(row) => `${row.agent}-${row.totalAttempts}-${row.totalPaid}`}
-                                   
+                                    getRowId={(row) => `${row.DialedAt}-${row.from}-${row.to}`}
                                 />
                             </div>
                         </CardContent>
@@ -223,4 +269,4 @@ const AgentSaleReport = () => {
     );
 };
 
-export default AgentSaleReport;
+export default RetellCallLogs;
