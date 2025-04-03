@@ -11,6 +11,7 @@ import ThreeWayReport from './ThreeWayReport';
 import AgentSaleReport from './AgentSaleReport';
 import RetellClientPosting from './RetellClientPosting';
 import RetellCallLogs from './RetellCallLogs';
+import RetellDisconnectedCall from './RetellDisconnectedCall';
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
                 <Route path="/AgentSaleReport" element={<AgentSaleReport />} />  
                 <Route path="/RetellClientPosting" element={<RetellClientPosting />} /> 
                 <Route path="/RetellCallLogs" element={<RetellCallLogs />} /> 
+                <Route path="/RetellDisconnectedCall" element={<RetellDisconnectedCall />} /> 
             </Routes>
         </Router>
     );

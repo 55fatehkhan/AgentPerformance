@@ -222,6 +222,66 @@ app.post('/api/RetellCallLogs', async (req, res) => {
 });
 
 
+// Retell Disconnects Call logs Report API
+app.post('/api/RetellDisconnectedCall', async (req, res) => {
+    const { fromDate, toDate } = req.body;
+
+    // Construct dynamic match conditions based on user input
+    let matchConditions1 = {
+        createdAt: {
+            $gte: fromDate ? new Date(fromDate + "T11:30:00Z") : new Date('1970-01-01T11:30:00Z'),
+            $lte: toDate ? new Date(toDate + "T11:30:00Z") : new Date()
+        } };
+
+    const pipeline = [
+        {
+            $match: matchConditions1
+        },
+        {
+            $unwind: {
+                path: "$retellCallAnalysedLogs",
+                preserveNullAndEmptyArrays: false
+            }
+        },
+        {
+            $match: {
+                "retellCallAnalysedLogs.disconnection_reason": "dial_failed"
+            }
+        },
+        {
+            $group: {
+                _id: "$phone",
+                count: {
+                    $sum: 1
+                }
+            }
+        },
+        {
+            $match: {
+                count: {
+                    $gte: 6
+                }
+            }
+        },
+        {
+            $project: {
+                phone: "$_id",
+                count: 1,
+                _id: 0
+            }
+        }
+  
+    ];
+    try {
+        const results = await Realtimelead.aggregate(pipeline);
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error running aggregation:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 // Agent Sale Report API
 app.post('/api/AgentSaleReport', async (req, res) => {
     try {

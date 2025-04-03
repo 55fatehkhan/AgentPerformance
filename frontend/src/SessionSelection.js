@@ -44,6 +44,9 @@ const SessionSelection = () => {
     const goToRetellCallLogs = () => {
         navigate('/RetellCallLogs'); 
     };
+    const goToRetellDisconnetCall = () => {
+        navigate('/RetellDisconnectedCall'); 
+    };
 
     return (
         <div className="session-selection-container">
@@ -91,6 +94,13 @@ const SessionSelection = () => {
                     <div className="card restricted-card" onClick={goToRetellCallLogs}>
                         <h2>ONLY FOR Internal Team: STL</h2>
                         <p>Retell Call logs, daily. We can get here every sort of detail of dialing as per required date</p>
+                    </div>
+                )}
+
+                {(role === 'admin' && centerName === 'both') && (
+                    <div className="card restricted-card" onClick={goToRetellDisconnetCall}>
+                        <h2>ONLY FOR Internal Team: STL</h2>
+                        <p>Retell Call logs: DISCONNECTS NUMBER</p>
                     </div>
                 )}
 
