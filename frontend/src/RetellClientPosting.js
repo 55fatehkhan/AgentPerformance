@@ -2,6 +2,7 @@ import './RetellClientPosting.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Grid, Card, CardContent, Stack } from '@mui/material';
+import axios from 'axios';
 
 const RetellClientPosting = () => {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ const RetellClientPosting = () => {
         postalCode: '',
         email: '',
         phone: '',
+        searchPhoneNumber: ''
     });
 
     const handleChange = (e) => {
@@ -23,9 +25,53 @@ const RetellClientPosting = () => {
         });
     };
 
+    const handlePhoneSearch = async () => {
+        try {
+            // Constructing the query URL with the phone number
+            const url = new URL(`${process.env.REACT_APP_API_BACKEND}/search-by-phone`);
+            url.searchParams.append('phone', formData.searchPhoneNumber);
+    
+            // Making the fetch call
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+    
+            // Parsing the JSON response
+            const data = await response.json();
+           // console.log("data; ", data);
+    
+            if (data.success) {
+                // If the fetch was successful and data was found, update the formData state
+                setFormData({
+                    ...formData,
+                    firstName: data.details.firstName,
+                    lastName: data.details.lastName,
+                    address: data.details.address,
+                    city: data.details.city,
+                    state: data.details.state,
+                    postalCode: data.details.postalCode,
+                    email: data.details.email,
+                    phone: data.details.phone,
+                });
+            } else {
+                // If no details were found
+                alert('No details found for the entered phone number');
+            }
+        } catch (error) {
+            // Log and any errors
+            console.error('Failed to fetch details:', error);
+            alert('Error fetching details');
+        }
+    };
+    
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form Data Submitted:', formData);
+       // console.log('Form Data Submitted:', formData);
         // Later, we'll send this data to the server via API call
         try {
             const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/post-to-client`, {
@@ -55,6 +101,7 @@ const RetellClientPosting = () => {
             postalCode: '',
             email: '',
             phone: '',
+            searchPhoneNumber: ''
         });
     };
 
@@ -65,7 +112,28 @@ const RetellClientPosting = () => {
                     <Typography variant="h5" className="form-title">
                         Client Posting Form
                     </Typography>
-                    <form onSubmit={handleSubmit}>
+
+
+                    <TextField
+                    fullWidth
+                    label="Phone Number for Search"
+                    name="searchPhoneNumber"
+                    value={formData.searchPhoneNumber}
+                    onChange={handleChange}
+                    required
+                />
+                <Button 
+                    variant="contained" 
+                    color="primary"
+                    onClick={handlePhoneSearch}
+                    sx={{ mb: 4 }}
+                >
+                    Search Details
+                </Button>
+
+
+
+                    <form onSubmit={handleSubmit} autocomplete="off">
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField

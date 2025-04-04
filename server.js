@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 
-
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -386,6 +385,80 @@ app.post('/api/AgentSaleReport', async (req, res) => {
     }
 });
 
+// Define the schema for the Realtimeleads collection for postclient number details
+const realtimeleadSchema = new mongoose.Schema({
+    fname: String,
+    lname: String,
+    address: String,
+    city: String,
+    state: String,
+    zip: String,
+    email: String,
+    phone: String
+});
+
+// Create the model
+const Realtimeleadd = mongoose.model('realtimeleads', realtimeleadSchema);
+
+//search details to posttoclient before post
+async function findClientDetailsByPhone(phone) {
+   // console.log("Phone in findClient function: ", phone, "Type of phone:", typeof phone);
+    try {
+
+        const numericPhone = parseInt(phone, 10);  // Convert phone string to number
+        if (isNaN(numericPhone)) {
+            console.error("Invalid phone number, cannot convert to number");
+            return null;
+        }
+
+        const pipeline = [
+            { $match: { phone: numericPhone  } },  // Ensuring the phone is treated as a string
+            { $project: {
+                _id: 0,
+                firstName: '$fname',
+                lastName: '$lname',
+                address: 1,
+                city: 1,
+                state: 1,
+                postalCode: '$zip',
+                email: 1,
+                phone: 1
+            }}
+        ];
+       // console.log('Pipeline: ', JSON.stringify(pipeline));  // Use JSON.stringify to see the full structure in console
+        // Execute the aggregation pipeline on the correct model
+        const results = await Realtimeleadd.aggregate(pipeline);
+
+        // Return result if it exists
+        return results;
+
+    } catch (error) {
+        console.error("Error in findClientDetailsByPhone: ", error);
+        return null; // Return null or handle the error as needed
+    }
+}
+
+
+// search detail of phone number from realtimeleads for Carlos
+app.get('/search-by-phone', async (req, res) => {
+    const { phone } = req.query;
+    try {
+        // Assuming you have a function to query your database
+        const clientDetails = await findClientDetailsByPhone(phone);
+        if (clientDetails && clientDetails.length > 0) {
+            // Send only the first result to the frontend
+            res.json({ success: true, details: clientDetails[0] });
+        } else {
+            res.status(404).json({ success: false, message: 'No details found' });
+        }
+    } catch (error) {
+        console.error('Database query error:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
+
+
 //POST to CLIENT method, leads posting for Retell RealTime Leads by Carlos
 app.post('/post-to-client', async (req, res) => {
     try {
@@ -408,7 +481,7 @@ app.post('/post-to-client', async (req, res) => {
         });
 
         const responseData = await response.text(); // Get API response as text
-        console.log("Response Data: ", responseData);
+        console.log("Response from client API while posting: ",responseData );
 
         return res.status(200).json({ success: true, message: 'Data posted successfully', data: responseData });
 

@@ -83,7 +83,7 @@ const SessionSelection = () => {
 
 
   {/* Conditionally Render Client Posting Section */}
-                {(role === 'QC' && centerName === 'both') && (
+                {(role === 'QC' || 'admin' && centerName === 'both') && (
                     <div className="card restricted-card" onClick={goToClientPostingRetell}>
                         <h2>ONLY FOR CARLOS: Client Posting</h2>
                         <p>Disclaimer: ONLY FOR CARLOS and his QC Team. You can post leads to the client after verification, like listening to recordings, etc.</p>
