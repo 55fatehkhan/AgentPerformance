@@ -47,6 +47,12 @@ const SessionSelection = () => {
     const goToRetellDisconnetCall = () => {
         navigate('/RetellDisconnectedCall'); 
     };
+    const goToRetellDIDConnets = () => {
+        navigate('/RetellDIDConnects'); 
+    };
+    const goToRetellCarrierConnets = () => {
+        navigate('/RetellCarrierConnects'); 
+    };
 
     return (
         <div className="session-selection-container">
@@ -101,6 +107,18 @@ const SessionSelection = () => {
                     <div className="card restricted-card" onClick={goToRetellDisconnetCall}>
                         <h2>ONLY FOR Internal Team: STL</h2>
                         <p>Retell Call logs: DISCONNECTS NUMBER</p>
+                    </div>
+                )}
+                {(role === 'admin' && centerName === 'both') && (
+                    <div className="card restricted-card" onClick={goToRetellDIDConnets}>
+                        <h2>ONLY FOR Internal Team: STL</h2>
+                        <p>Retell Call logs: DID Connects Rate</p>
+                    </div>
+                )}
+                {(role === 'admin' && centerName === 'both') && (
+                    <div className="card restricted-card" onClick={goToRetellCarrierConnets}>
+                        <h2>ONLY FOR Internal Team: STL</h2>
+                        <p>Retell Call logs: Carrier Connects Rate</p>
                     </div>
                 )}
 

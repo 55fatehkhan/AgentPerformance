@@ -12,6 +12,8 @@ import AgentSaleReport from './AgentSaleReport';
 import RetellClientPosting from './RetellClientPosting';
 import RetellCallLogs from './RetellCallLogs';
 import RetellDisconnectedCall from './RetellDisconnectedCall';
+import RetellDIDConnects from './RetellDIDConnects';
+import RetellCarrierConnects from './RetellCarrierConnects';
 
 
 function App() {
@@ -30,6 +32,8 @@ function App() {
                 <Route path="/RetellClientPosting" element={<RetellClientPosting />} /> 
                 <Route path="/RetellCallLogs" element={<RetellCallLogs />} /> 
                 <Route path="/RetellDisconnectedCall" element={<RetellDisconnectedCall />} /> 
+                <Route path="/RetellDIDConnects" element={<RetellDIDConnects />} /> 
+                <Route path="/RetellCarrierConnects" element={<RetellCarrierConnects />} /> 
             </Routes>
         </Router>
     );

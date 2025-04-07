@@ -281,6 +281,335 @@ app.post('/api/RetellDisconnectedCall', async (req, res) => {
 });
 
 
+// DID Connects Rate Report
+app.post('/api/RetellDIDConnectsRate', async (req, res) => {
+    const { fromDate, toDate } = req.body;
+
+    // Construct dynamic date matching condition based on user input
+    let dateMatchCondition = {
+        dialedAt: {
+            $gte: fromDate ? new Date(fromDate + "T11:30:00Z") : new Date('1970-01-01T11:30:00Z'),
+            $lte: toDate ? new Date(toDate + "T11:30:00Z") : new Date()
+        }
+    };
+
+    // MongoDB aggregation pipeline
+    const pipeline = [
+        {
+            $unwind: {
+                path: "$retellCallAnalysedLogs",
+                includeArrayIndex: "dial_index",
+                preserveNullAndEmptyArrays: false
+            }
+        },
+        {
+            $addFields: {
+                did: {
+                    $cond: {
+                        if: { $eq: ["$retellCallAnalysedLogs.direction", "inbound"] },
+                        then: "$retellCallAnalysedLogs.to_number",
+                        else: "$retellCallAnalysedLogs.from_number"
+                    }
+                }
+            }
+        },
+        {
+            $addFields: {
+                dialedAt: {
+                    $toDate: "$retellCallAnalysedLogs.start_timestamp"
+                },
+                createdAtSimple: {
+                    $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$createdAt"
+                    }
+                }
+            }
+        },
+        {
+            $match: dateMatchCondition
+        },
+        {
+            $lookup: {
+                from: "ipqslogs",
+                localField: "phone",
+                foreignField: "phone",
+                as: "ipqs"
+            }
+        },
+        {
+            $project: {
+                from: { $ifNull: ["$retellCallAnalysedLogs.from_number", ""] },
+                to: { $ifNull: ["$retellCallAnalysedLogs.to_number", ""] },
+                direction: { $ifNull: ["$retellCallAnalysedLogs.direction", ""] },
+                duration_seconds: { $round: [{ $ifNull: [{ $divide: ["$retellCallAnalysedLogs.duration_ms", 1000]}, 0]}, 0]},
+                recording_url: { $ifNull: ["$retellCallAnalysedLogs.recording_url", ""] },
+                disconnect_reason: { $ifNull: ["$retellCallAnalysedLogs.disconnection_reason", ""] },
+                call_cost: { $divide: ["$retellCallAnalysedLogs.call_cost.combined_cost", 100] },
+                call_disposition: "$retellCallAnalysedLogs.call_analysis.custom_analysis_data.call_disposition",
+                call_id: "$retellCallAnalysedLogs.call_id",
+                latency: "$retellCallAnalysedLogs.latency.e2e.p50",
+                createdAtSimple: 1,
+                dial_index: 1,
+                subId: 1,
+                source: 1,
+                campaign: 1,
+                did: 1,
+                _id: 0
+            }
+        },
+        {
+            $addFields: {
+                classification: {
+                    $cond: {
+                        if: {
+                            $in: ["$call_disposition", ["CALLBK", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER", "B", "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP", "Xferh", "LB", "HO", "AFTHRS", "BN", "CALLBK", "DEC", "DNC", "DROP", "HU", "INXFER", "LB", "NHO", "NI", "NQ", "RQXFER", "SALE", "TEST", "TIMEOT", "WN", "XFER"]]
+                        },
+                        then: "HUMAN",
+                        else: "MACHINE"
+                    }
+                }
+            }
+        },
+        {
+            $group: {
+                _id: "$did",
+                Human: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$classification", "HUMAN"] },
+                            1,
+                            0
+                        ]
+                    }
+                },
+                Machine: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$classification", "MACHINE"] },
+                            1,
+                            0
+                        ]
+                    }
+                },
+                GrandTotal: { $sum: 1 }
+            }
+        },
+        {
+            $addFields: {
+                "Human Answer%": {
+                    $round: [
+                        { $multiply: [{ $divide: ["$Human", "$GrandTotal"] }, 100] },
+                        2
+                    ]
+                }
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                agentsData: { $push: "$$ROOT" },
+                totalHuman: { $sum: "$Human" },
+                totalMachine: { $sum: "$Machine" },
+                totalGrandTotal: { $sum: "$GrandTotal" }
+            }
+        },
+        {
+            $addFields: {
+                totals: {
+                    _id: "Grand Total",
+                    Human: "$totalHuman",
+                    Machine: "$totalMachine",
+                    GrandTotal: "$totalGrandTotal"
+                }
+            }
+        },
+        {
+            $project: {
+                finalResult: { $concatArrays: ["$agentsData", ["$totals"]] }
+            }
+        },
+        {
+            $unwind: "$finalResult"
+        },
+        {
+            $replaceRoot: {
+                newRoot: "$finalResult"
+            }
+        }
+    ];
+
+    try {
+        const results = await Realtimelead.aggregate(pipeline);
+       // console.log(results);
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error running aggregation:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Carrier Connects Rate Report
+app.post('/api/RetellCarrierConnectsRate', async (req, res) => {
+    const { fromDate, toDate } = req.body;
+
+    // Construct dynamic date matching condition based on user input
+    let dateMatchCondition = {
+        dialedAt: {
+            $gte: fromDate ? new Date(fromDate + "T11:30:00Z") : new Date('1970-01-01T11:30:00Z'),
+            $lte: toDate ? new Date(toDate + "T11:30:00Z") : new Date()
+        }
+    };
+
+    // MongoDB aggregation pipeline
+    const pipeline = [
+        {
+            $unwind: {
+                path: "$retellCallAnalysedLogs",
+                includeArrayIndex: "dial_index",
+                preserveNullAndEmptyArrays: false
+            }
+        },
+        {
+            $addFields: {
+                did: {
+                    $cond: {
+                        if: { $eq: ["$retellCallAnalysedLogs.direction", "inbound"] },
+                        then: "$retellCallAnalysedLogs.to_number",
+                        else: "$retellCallAnalysedLogs.from_number"
+                    }
+                }
+            }
+        },
+        {
+            $addFields: {
+                dialedAt: {
+                    $toDate: "$retellCallAnalysedLogs.start_timestamp"
+                },
+                createdAtSimple: {
+                    $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$createdAt"
+                    }
+                }
+            }
+        },
+        {
+            $match: dateMatchCondition
+        },
+        {
+            $project: {
+                from: { $ifNull: ["$retellCallAnalysedLogs.from_number", ""] },
+                to: { $ifNull: ["$retellCallAnalysedLogs.to_number", ""] },
+                direction: { $ifNull: ["$retellCallAnalysedLogs.direction", ""] },
+                duration_seconds: { $round: [{ $ifNull: [{ $divide: ["$retellCallAnalysedLogs.duration_ms", 1000]}, 0]}, 0]},
+                recording_url: { $ifNull: ["$retellCallAnalysedLogs.recording_url", ""] },
+                disconnect_reason: { $ifNull: ["$retellCallAnalysedLogs.disconnection_reason", ""] },
+                call_cost: { $divide: ["$retellCallAnalysedLogs.call_cost.combined_cost", 100] },
+                call_disposition: "$retellCallAnalysedLogs.call_analysis.custom_analysis_data.call_disposition",
+                call_id: "$retellCallAnalysedLogs.call_id",
+                latency: "$retellCallAnalysedLogs.latency.e2e.p50",
+                createdAtSimple: 1,
+                dial_index: 1,
+                subId: 1,
+                source: 1,
+                campaign: 1,
+                did: 1,
+                _id: 0
+            }
+        },
+        {
+            $addFields: {
+                classification: {
+                    $cond: {
+                        if: {
+                            $in: ["$call_disposition", ["CALLBK", "DEC", "DNC", "HU", "NHW", "NI", "NQ", "SALE", "WN", "XFER", "B", "CDrop", "Cs", "NH", "NHO", "NP", "CBHOLD", "INXFER", "PU", "PDROP", "Xferh", "LB", "HO", "AFTHRS", "BN", "CALLBK", "DEC", "DNC", "DROP", "HU", "INXFER", "LB", "NHO", "NI", "NQ", "RQXFER", "SALE", "TEST", "TIMEOT", "WN", "XFER"]]
+                        },
+                        then: "HUMAN",
+                        else: "MACHINE"
+                    }
+                }
+            }
+        },
+        {
+            $group: {
+                _id: "$did",
+                Human: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$classification", "HUMAN"] },
+                            1,
+                            0
+                        ]
+                    }
+                },
+                Machine: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$classification", "MACHINE"] },
+                            1,
+                            0
+                        ]
+                    }
+                },
+                GrandTotal: { $sum: 1 }
+            }
+        },
+        {
+            $addFields: {
+                "Human Answer%": {
+                    $round: [
+                        { $multiply: [{ $divide: ["$Human", "$GrandTotal"] }, 100] },
+                        2
+                    ]
+                }
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                agentsData: { $push: "$$ROOT" },
+                totalHuman: { $sum: "$Human" },
+                totalMachine: { $sum: "$Machine" },
+                totalGrandTotal: { $sum: "$GrandTotal" }
+            }
+        },
+        {
+            $addFields: {
+                totals: {
+                    _id: "Grand Total",
+                    Human: "$totalHuman",
+                    Machine: "$totalMachine",
+                    GrandTotal: "$totalGrandTotal"
+                }
+            }
+        },
+        {
+            $project: {
+                finalResult: { $concatArrays: ["$agentsData", ["$totals"]] }
+            }
+        },
+        {
+            $unwind: "$finalResult"
+        },
+        {
+            $replaceRoot: {
+                newRoot: "$finalResult"
+            }
+        }
+    ];
+
+    try {
+        const results = await Realtimelead.aggregate(pipeline);
+       // console.log(results);
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error running aggregation:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 // Agent Sale Report API
 app.post('/api/AgentSaleReport', async (req, res) => {
     try {
