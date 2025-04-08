@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const fetch = require('node-fetch');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -330,14 +331,6 @@ app.post('/api/RetellDIDConnectsRate', async (req, res) => {
             $match: dateMatchCondition
         },
         {
-            $lookup: {
-                from: "ipqslogs",
-                localField: "phone",
-                foreignField: "phone",
-                as: "ipqs"
-            }
-        },
-        {
             $project: {
                 from: { $ifNull: ["$retellCallAnalysedLogs.from_number", ""] },
                 to: { $ifNull: ["$retellCallAnalysedLogs.to_number", ""] },
@@ -498,6 +491,27 @@ app.post('/api/RetellCarrierConnectsRate', async (req, res) => {
             $match: dateMatchCondition
         },
         {
+            $lookup: {
+                from: "ipqslogs",
+                localField: "phone",
+                foreignField: "phone",
+                as: "ipqs"
+            }
+        },
+        {
+            $addFields: {
+                ipqs: {
+                    $reduce: {
+                        input: "$ipqs",
+                        initialValue: {},
+                        in: {
+                          $mergeObjects: ["$$value", "$$this"]
+                        }
+                      }
+                    }
+                }
+            },
+        {
             $project: {
                 from: { $ifNull: ["$retellCallAnalysedLogs.from_number", ""] },
                 to: { $ifNull: ["$retellCallAnalysedLogs.to_number", ""] },
@@ -514,6 +528,7 @@ app.post('/api/RetellCarrierConnectsRate', async (req, res) => {
                 subId: 1,
                 source: 1,
                 campaign: 1,
+                carrier: "$ipqs.resonseBody.carrier",
                 did: 1,
                 _id: 0
             }
@@ -533,7 +548,7 @@ app.post('/api/RetellCarrierConnectsRate', async (req, res) => {
         },
         {
             $group: {
-                _id: "$did",
+                _id: "$carrier",
                 Human: {
                     $sum: {
                         $cond: [
@@ -800,6 +815,7 @@ app.post('/post-to-client', async (req, res) => {
 
         // Construct API URL https://choicehomewarranty.com
         let url = `https://choicehomewarranty.com/host-post.php?NETWORKID=sclPT&AFID=blindxfer&FirstName=${encodeURIComponent(firstName)}&LastName=${encodeURIComponent(lastName)}&Address=${encodeURIComponent(address)}&City=${encodeURIComponent(city)}&State=${encodeURIComponent(state)}&PostalCode=${encodeURIComponent(postalCode)}&Phone=${encodeURIComponent(phone)}&Email=${encodeURIComponent(email)}&IPAddress=208.109.184.203&_OwnHome=Yes&_optin=Yes&Team=b`;
+        fetch
 
         // Send request to client API
         const response = await fetch(url, {

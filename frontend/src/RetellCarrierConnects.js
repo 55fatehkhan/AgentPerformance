@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Card, CardContent, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import { nanoid } from 'nanoid'
+
 
 const RetellDisconnectedCall = () => {
     const navigate = useNavigate();
@@ -97,7 +99,7 @@ const RetellDisconnectedCall = () => {
     };
 
     const columns = [
-        { field: '_id', headerName: 'DID', width: 200 },
+        { field: '_id', headerName: 'CarrierName', width: 200 },
         { field: 'Human', headerName: 'HumanCount', width: 150 },
         { field: 'Machine', headerName: 'MachineCount', width: 150 },
         { field: 'GrandTotal', headerName: 'GrandTotal', width: 150 },
@@ -171,7 +173,15 @@ const RetellDisconnectedCall = () => {
                                     rowsPerPageOptions={[10, 20, 50]}
                                     checkboxSelection
                                     disableSelectionOnClick
-                                    getRowId={(row) => `${row._id}-${row.Human}-${row.Machine}${row.GrandTotal}`}
+                                    // getRowId={(row, index) => 
+                                    // row._id && row.Human && row.Machine && row.GrandTotal
+                                    // ? `${row._id}-${row.Human}-${row.Machine}-${row.GrandTotal}`
+                                    // : `row-${index}-${Math.random()}`
+                                    // }
+
+                                    // with nanoid to make unique rows
+                                    getRowId={(row) => `${row._id}-${row.Human}-${row.Machine}-${row.GrandTotal}-${nanoid(5)}`}
+
                                 />
                             </div>
                         </CardContent>
