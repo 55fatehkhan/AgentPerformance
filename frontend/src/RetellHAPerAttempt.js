@@ -1,12 +1,10 @@
-import './RetellCarrierConnects.css';
+import './RetellHAPerAttempt.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Card, CardContent, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { nanoid } from 'nanoid'
 
-
-const RetellCarrierConnects = () => {
+const RetellHAPerAttempt = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -54,7 +52,7 @@ const RetellCarrierConnects = () => {
         setIsSubmitted(true);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellCarrierConnectsRate`, {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellHAPerAttemptCount`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,7 +63,7 @@ const RetellCarrierConnects = () => {
             const result = await response.json();
             setData(result);
         } catch (error) {
-            console.error('Error fetching Retell Carrier Connects Rate data:', error);
+            console.error('Error fetching Retell Per Attempt HA data:', error);
         } finally {
             setLoading(false);
         }
@@ -92,14 +90,14 @@ const RetellCarrierConnects = () => {
         const blob = new Blob([csv], { type: 'text/csv' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', 'retellCarrierConnects_data.csv');
+        link.setAttribute('download', 'retellPerAttemptHA_data.csv');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
     const columns = [
-        { field: '_id', headerName: 'CarrierName', width: 200 },
+        { field: '_id', headerName: 'DID', width: 200 },
         { field: 'Human', headerName: 'HumanCount', width: 150 },
         { field: 'Machine', headerName: 'MachineCount', width: 150 },
         { field: 'GrandTotal', headerName: 'GrandTotal', width: 150 },
@@ -107,9 +105,9 @@ const RetellCarrierConnects = () => {
     ];
 
     return (
-        <div className="retellCarrierCallReport-container">
-            <header className="retellCarrierCallReport-header">
-                <h1>Retell Carrier Connects Rate Report</h1>
+        <div className="retellPerAttemptHAReport-container">
+            <header className="retellPerAttemptHAReport-header">
+                <h1>Retell Per Attempt Human Answer Report</h1>
                 <div className="user-info">
                     <button className="logout-btn" onClick={handleLogout}>Logout 🔒</button>
                 </div>
@@ -147,7 +145,7 @@ const RetellCarrierConnects = () => {
                 </form>
             </div>
 
-            <div className="retellCarrierCallReport-content">
+            <div className="retellPerAttemptHAReport-content">
                 {loading && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
                         <CircularProgress />
@@ -173,15 +171,7 @@ const RetellCarrierConnects = () => {
                                     rowsPerPageOptions={[10, 20, 50]}
                                     checkboxSelection
                                     disableSelectionOnClick
-                                    // getRowId={(row, index) => 
-                                    // row._id && row.Human && row.Machine && row.GrandTotal
-                                    // ? `${row._id}-${row.Human}-${row.Machine}-${row.GrandTotal}`
-                                    // : `row-${index}-${Math.random()}`
-                                    // }
-
-                                    // with nanoid to make unique rows
-                                    getRowId={(row) => `${row._id}-${row.Human}-${row.Machine}-${row.GrandTotal}-${nanoid(5)}`}
-
+                                    getRowId={(row) => `${row._id}-${row.Human}-${row.Machine}${row.GrandTotal}`}
                                 />
                             </div>
                         </CardContent>
@@ -192,4 +182,4 @@ const RetellCarrierConnects = () => {
     );
 };
 
-export default RetellCarrierConnects;
+export default RetellHAPerAttempt;

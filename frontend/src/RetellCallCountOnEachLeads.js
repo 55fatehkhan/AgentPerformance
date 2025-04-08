@@ -1,12 +1,10 @@
-import './RetellCarrierConnects.css';
+import './RetellCallCountOnEachLeads.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Card, CardContent, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-import { nanoid } from 'nanoid'
 
-
-const RetellCarrierConnects = () => {
+const RetellCallCountOnEachLeads = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -54,7 +52,7 @@ const RetellCarrierConnects = () => {
         setIsSubmitted(true);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellCarrierConnectsRate`, {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellCallCountOnLeads`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,7 +63,7 @@ const RetellCarrierConnects = () => {
             const result = await response.json();
             setData(result);
         } catch (error) {
-            console.error('Error fetching Retell Carrier Connects Rate data:', error);
+            console.error('Error fetching Retell Call Count on Each Leads data:', error);
         } finally {
             setLoading(false);
         }
@@ -92,24 +90,37 @@ const RetellCarrierConnects = () => {
         const blob = new Blob([csv], { type: 'text/csv' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', 'retellCarrierConnects_data.csv');
+        link.setAttribute('download', 'retellCallCountOnEachLead_data.csv');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
     const columns = [
-        { field: '_id', headerName: 'CarrierName', width: 200 },
-        { field: 'Human', headerName: 'HumanCount', width: 150 },
-        { field: 'Machine', headerName: 'MachineCount', width: 150 },
-        { field: 'GrandTotal', headerName: 'GrandTotal', width: 150 },
-        { field: 'Human Answer%', headerName: 'Human Answer%', width: 150 },
+        { field: 'Phone Number', headerName: 'Phone', width: 200 },
+        { field: 'First Name', headerName: 'FirstName', width: 150 },
+        { field: 'Last Name', headerName: 'LastName', width: 150 },
+        { field: 'Status', headerName: 'Status', width: 150 },
+        { field: 'Campaign', headerName: 'Campaign', width: 150 },
+        { field: 'CreatedAt', headerName: 'CreatedAt', width: 150 },
+        { field: 'Total Calls', headerName: 'Attempt/TotalCallCount', width: 150 },
+        { field: 'Call Attempt 1', headerName: 'Call Attempt 1', width: 150 },
+        { field: 'Call Attempt 2', headerName: 'Call Attempt 2', width: 150 },
+        { field: 'Call Attempt 3', headerName: 'Call Attempt 3', width: 150 },
+        { field: 'Call Attempt 4', headerName: 'Call Attempt 4', width: 150 },
+        { field: 'Call Attempt 5', headerName: 'Call Attempt 5', width: 150 },
+        { field: 'Call Attempt 6', headerName: 'Call Attempt 6', width: 150 },
+        { field: 'Call Attempt 7', headerName: 'Call Attempt 7', width: 150 },
+        { field: 'Call Attempt 8', headerName: 'Call Attempt 8', width: 150 },
+        { field: 'Call Attempt 9', headerName: 'Call Attempt 9', width: 150 },
+        { field: 'Call Attempt 10', headerName: 'Call Attempt 10', width: 150 }
+        
     ];
 
     return (
-        <div className="retellCarrierCallReport-container">
-            <header className="retellCarrierCallReport-header">
-                <h1>Retell Carrier Connects Rate Report</h1>
+        <div className="retellCallCountLeads-container">
+            <header className="retellCallCountLeads-header">
+                <h1>Retell - Call Count on Each Leads Per day Report</h1>
                 <div className="user-info">
                     <button className="logout-btn" onClick={handleLogout}>Logout 🔒</button>
                 </div>
@@ -147,7 +158,7 @@ const RetellCarrierConnects = () => {
                 </form>
             </div>
 
-            <div className="retellCarrierCallReport-content">
+            <div className="retellCallCountLeads-content">
                 {loading && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
                         <CircularProgress />
@@ -173,15 +184,7 @@ const RetellCarrierConnects = () => {
                                     rowsPerPageOptions={[10, 20, 50]}
                                     checkboxSelection
                                     disableSelectionOnClick
-                                    // getRowId={(row, index) => 
-                                    // row._id && row.Human && row.Machine && row.GrandTotal
-                                    // ? `${row._id}-${row.Human}-${row.Machine}-${row.GrandTotal}`
-                                    // : `row-${index}-${Math.random()}`
-                                    // }
-
-                                    // with nanoid to make unique rows
-                                    getRowId={(row) => `${row._id}-${row.Human}-${row.Machine}-${row.GrandTotal}-${nanoid(5)}`}
-
+                                    getRowId={(row) => `${row.CreatedAt}-${row.Campaign}-${row.Status}`}
                                 />
                             </div>
                         </CardContent>
@@ -192,4 +195,4 @@ const RetellCarrierConnects = () => {
     );
 };
 
-export default RetellCarrierConnects;
+export default RetellCallCountOnEachLeads;

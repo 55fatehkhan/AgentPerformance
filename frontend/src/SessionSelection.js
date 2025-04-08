@@ -53,12 +53,21 @@ const SessionSelection = () => {
     const goToRetellCarrierConnets = () => {
         navigate('/RetellCarrierConnects'); 
     };
+    const goToRetellHAPerAttempt = () => {
+        navigate('/RetellHAPerAttempt'); 
+    };
+    const goToRetellCallCountEachLeads = () => {
+        navigate('/RetellCallCountOnEachLeads'); 
+    };
+
+
+
 
     return (
         <div className="session-selection-container">
             <h1>Select Section</h1>
             <div className="card-container">
-                <div className="card" onClick={goToDashboard}>
+                {/* <div className="card" onClick={goToDashboard}>
                     <h2>Agent Performance Section</h2>
                     <p>Analyze agent performance metrics and reports.</p>
                 </div>
@@ -85,40 +94,86 @@ const SessionSelection = () => {
                 <div className="card" onClick={goToAgentSaleReport}>
                     <h2>Agents Wise Sale, Inbound Vs Outbound</h2>
                     <p>Agent Wise sale, Center wise or Campaign wise</p>
-                </div>
+                </div> */}
+
+                {role !== 'adminretell' && (
+    <>
+        <div className="card" onClick={goToDashboard}>
+            <h2>Agent Performance Section</h2>
+            <p>Analyze agent performance metrics and reports.</p>
+        </div>
+        <div className="card" onClick={goToFilePerformance}>
+            <h2>Files Performance Section</h2>
+            <p>Analyse and manage file performance data.</p>
+        </div>
+        <div className="card" onClick={goToRuntimeAnalysis}>
+            <h2>Runtime Analysis Section</h2>
+            <p>Analyse the files, how they perform on each run</p>
+        </div>
+        <div className="card" onClick={goToVoipCost}>
+            <h2>VoIP Cost</h2>
+            <p>Check the VoIP Cost</p>
+        </div>
+        <div className="card" onClick={goToClientReport}>
+            <h2>Client Report</h2>
+            <p>Client Report analysis and along with how our data performs for client, everything</p>
+        </div>
+        <div className="card" onClick={goToThreeWayReport}>
+            <h2>Threeway Report</h2>
+            <p>Threeway Report for analysis</p>
+        </div>
+        <div className="card" onClick={goToAgentSaleReport}>
+            <h2>Agents Wise Sale, Inbound Vs Outbound</h2>
+            <p>Agent Wise sale, Center wise or Campaign wise</p>
+        </div>
+    </>
+)}
+
 
 
   {/* Conditionally Render Client Posting Section */}
-                {(role === 'QC' || 'admin' && centerName === 'both') && (
+                {(role === 'QC' || 'adminretell' && centerName === 'both') && (
                     <div className="card restricted-card" onClick={goToClientPostingRetell}>
                         <h2>ONLY FOR CARLOS: Client Posting</h2>
                         <p>Disclaimer: ONLY FOR CARLOS and his QC Team. You can post leads to the client after verification, like listening to recordings, etc.</p>
                     </div>
                 )}
 
-                {(role === 'admin' && centerName === 'both') && (
-                    <div className="card restricted-card" onClick={goToRetellCallLogs}>
-                        <h2>ONLY FOR Internal Team: STL</h2>
-                        <p>Retell Call logs, daily. We can get here every sort of detail of dialing as per required date</p>
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellCallLogs}>
+                        <h2>Retell Call logs Analysis</h2>
+                        <p>We can get here every sort of detail of dialing from Retell as per requirement, either cost, HA, Disconnection reason, Latency, etc</p>
                     </div>
                 )}
 
-                {(role === 'admin' && centerName === 'both') && (
-                    <div className="card restricted-card" onClick={goToRetellDisconnetCall}>
-                        <h2>ONLY FOR Internal Team: STL</h2>
-                        <p>Retell Call logs: DISCONNECTS NUMBER</p>
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellDisconnetCall}>
+                        <h2>Disconnects Numbers</h2>
+                        <p>Retell- check disconnect number to analyse, these are failed even after multiple attempts</p>
                     </div>
                 )}
-                {(role === 'admin' && centerName === 'both') && (
-                    <div className="card restricted-card" onClick={goToRetellDIDConnets}>
-                        <h2>ONLY FOR Internal Team: STL</h2>
-                        <p>Retell Call logs: DID Connects Rate</p>
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellDIDConnets}>
+                        <h2>DID Connects Rate</h2>
+                        <p>Retell- For Each DID Connects Rate, Human Answer, Machine and Total, to analyse DIDs</p>
                     </div>
                 )}
-                {(role === 'admin' && centerName === 'both') && (
-                    <div className="card restricted-card" onClick={goToRetellCarrierConnets}>
-                        <h2>ONLY FOR Internal Team: STL</h2>
-                        <p>Retell Call logs: Carrier Connects Rate</p>
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellCarrierConnets}>
+                        <h2>Carrier Connects Rate</h2>
+                        <p>Retell- Carrier Connects Rate analysis, which telephonic is giving us good Human Answer</p>
+                    </div>
+                )}
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellHAPerAttempt}>
+                        <h2>Human Answer Per Attempts</h2>
+                        <p>Retell- Human Answer Per Attempts Report --Note: 0 defines, 1st attempt--</p>
+                    </div>
+                )}
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellCallCountEachLeads}>
+                        <h2>Each number attempt count per day</h2>
+                        <p>Retell- Each number attempt count per day and timestamp with other details</p>
                     </div>
                 )}
 

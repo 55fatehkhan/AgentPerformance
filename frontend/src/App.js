@@ -14,6 +14,8 @@ import RetellCallLogs from './RetellCallLogs';
 import RetellDisconnectedCall from './RetellDisconnectedCall';
 import RetellDIDConnects from './RetellDIDConnects';
 import RetellCarrierConnects from './RetellCarrierConnects';
+import RetellHAPerAttempt from './RetellHAPerAttempt';
+import RetellCallCountOnEachLeads from './RetellCallCountOnEachLeads';
 
 
 function App() {
@@ -34,6 +36,8 @@ function App() {
                 <Route path="/RetellDisconnectedCall" element={<RetellDisconnectedCall />} /> 
                 <Route path="/RetellDIDConnects" element={<RetellDIDConnects />} /> 
                 <Route path="/RetellCarrierConnects" element={<RetellCarrierConnects />} /> 
+                <Route path="/RetellHAPerAttempt" element={<RetellHAPerAttempt />} />
+                <Route path="/RetellCallCountOnEachLeads" element={<RetellCallCountOnEachLeads />} /> 
             </Routes>
         </Router>
     );
