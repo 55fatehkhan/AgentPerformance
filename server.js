@@ -815,7 +815,6 @@ app.post('/post-to-client', async (req, res) => {
 
         // Construct API URL https://choicehomewarranty.com
         let url = `https://choicehomewarranty.com/host-post.php?NETWORKID=sclPT&AFID=blindxfer&FirstName=${encodeURIComponent(firstName)}&LastName=${encodeURIComponent(lastName)}&Address=${encodeURIComponent(address)}&City=${encodeURIComponent(city)}&State=${encodeURIComponent(state)}&PostalCode=${encodeURIComponent(postalCode)}&Phone=${encodeURIComponent(phone)}&Email=${encodeURIComponent(email)}&IPAddress=208.109.184.203&_OwnHome=Yes&_optin=Yes&Team=b`;
-        fetch
 
         // Send request to client API
         const response = await fetch(url, {
