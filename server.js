@@ -3,7 +3,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const fetch = require('node-fetch');
 
 const app = express();
 const port = process.env.PORT || 5000;
