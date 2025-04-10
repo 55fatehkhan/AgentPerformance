@@ -1,10 +1,10 @@
-import './RetellDIDConnects.css';
+import './RetellHAperLineType.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Card, CardContent, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
-const RetellDidConnectedCall = () => {
+const RetellHAperLineType = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -52,7 +52,7 @@ const RetellDidConnectedCall = () => {
         setIsSubmitted(true);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellDIDConnectsRate`, {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellHAperLineType`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ const RetellDidConnectedCall = () => {
             const result = await response.json();
             setData(result);
         } catch (error) {
-            console.error('Error fetching Retell DID Connects Rate data:', error);
+            console.error('Error fetching HA Per LineType data:', error);
         } finally {
             setLoading(false);
         }
@@ -90,14 +90,14 @@ const RetellDidConnectedCall = () => {
         const blob = new Blob([csv], { type: 'text/csv' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', 'retellDIDconnects_data.csv');
+        link.setAttribute('download', 'retellHAPerLineType_data.csv');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
     const columns = [
-        { field: '_id', headerName: 'DID', width: 200 },
+        { field: '_id', headerName: 'LineType', width: 200 },
         { field: 'Human', headerName: 'HumanCount', width: 150 },
         { field: 'Machine', headerName: 'MachineCount', width: 150 },
         { field: 'GrandTotal', headerName: 'GrandTotal', width: 150 },
@@ -105,9 +105,9 @@ const RetellDidConnectedCall = () => {
     ];
 
     return (
-        <div className="retellDIDCallReport-container">
-            <header className="retellDIDCallReport-header">
-                <h1>Retell DID Connects Rate Report</h1>
+        <div className="retellHAperLineType-container">
+            <header className="retellHAperLineType-header">
+                <h1>Retell- Human Answer Per LineType</h1>
                 <div className="user-info">
                     <button className="logout-btn" onClick={handleLogout}>Logout 🔒</button>
                 </div>
@@ -145,7 +145,7 @@ const RetellDidConnectedCall = () => {
                 </form>
             </div>
 
-            <div className="retellDIDCallReport-content">
+            <div className="retellHAperLineType-content">
                 {loading && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
                         <CircularProgress />
@@ -182,4 +182,4 @@ const RetellDidConnectedCall = () => {
     );
 };
 
-export default RetellDidConnectedCall;
+export default RetellHAperLineType;

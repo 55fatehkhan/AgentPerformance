@@ -1,10 +1,10 @@
-import './RetellDIDConnects.css';
+import './RetellAttemptCountForTransfer.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Card, CardContent, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
-const RetellDidConnectedCall = () => {
+const RetellAttemptCountForTransfer = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -12,8 +12,8 @@ const RetellDidConnectedCall = () => {
     };
 
     const [filters, setFilters] = useState({
-        fromDate: '',
-        toDate: ''
+        call_disposition: '',
+        disconnect_reason: ''
     });
 
     const Loggedin_centerName = sessionStorage.getItem('centerName');
@@ -52,7 +52,7 @@ const RetellDidConnectedCall = () => {
         setIsSubmitted(true);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellDIDConnectsRate`, {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellAttemptCount`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ const RetellDidConnectedCall = () => {
             const result = await response.json();
             setData(result);
         } catch (error) {
-            console.error('Error fetching Retell DID Connects Rate data:', error);
+            console.error('Error fetching Retell Attempt Count data:', error);
         } finally {
             setLoading(false);
         }
@@ -71,8 +71,8 @@ const RetellDidConnectedCall = () => {
 
     const handleReset = () => {
         setFilters({
-            fromDate: '',
-            toDate: ''
+            call_disposition: [],
+            disconnect_reason: []
         });
         setData([]);
         setIsSubmitted(false);
@@ -90,24 +90,22 @@ const RetellDidConnectedCall = () => {
         const blob = new Blob([csv], { type: 'text/csv' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', 'retellDIDconnects_data.csv');
+        link.setAttribute('download', 'retellAttemptCount_data.csv');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
     const columns = [
-        { field: '_id', headerName: 'DID', width: 200 },
-        { field: 'Human', headerName: 'HumanCount', width: 150 },
-        { field: 'Machine', headerName: 'MachineCount', width: 150 },
-        { field: 'GrandTotal', headerName: 'GrandTotal', width: 150 },
-        { field: 'Human Answer%', headerName: 'Human Answer%', width: 150 },
+        { field: 'phone', headerName: 'Phone', width: 200 },
+        { field: 'attempbeforeXFER', headerName: 'AttemptCount', width: 150 },
+        { field: 'createdAt', headerName: 'LeadsReceiveDate', width: 150 }
     ];
 
     return (
-        <div className="retellDIDCallReport-container">
-            <header className="retellDIDCallReport-header">
-                <h1>Retell DID Connects Rate Report</h1>
+        <div className="retellAttemptCount-container">
+            <header className="retellAttemptCount-header">
+                <h1>Retell- Attempt Count and Leads belong from which date</h1>
                 <div className="user-info">
                     <button className="logout-btn" onClick={handleLogout}>Logout 🔒</button>
                 </div>
@@ -116,27 +114,51 @@ const RetellDidConnectedCall = () => {
             <div className="filter-section">
                 <form onSubmit={handleSubmit} className="filter-form">
                     <div className="filter-row">
+                   
                         <div className="filter-field">
-                            <label htmlFor="fromDate">From Date</label>
-                            <input
-                                type="date"
-                                id="fromDate"
-                                name="fromDate"
-                                value={filters.fromDate}
+                            <label htmlFor="call_disposition">Disposition</label>
+                            <select
+                                multiple
+                                id="call_disposition"
+                                name="call_disposition"
+                                value={filters.call_disposition}
                                 onChange={handleInputChange}
-                            />
-                        </div>
-                        <div className="filter-field">
-                            <label htmlFor="toDate">To Date</label>
-                            <input
-                                type="date"
-                                id="toDate"
-                                name="toDate"
-                                value={filters.toDate}
-                                onChange={handleInputChange}
-                            />
+                            >
+
+                                <option value="">Disposition</option>
+                                <option value="AA">AA</option>
+                                <option value="ADC">ADC</option>
+                                <option value="CALLBK">CALLBK</option>
+                                <option value="DNC">DNC</option>
+                                <option value="HU">HU</option>
+                                <option value="NA">NA</option>
+                                <option value="NHO">NHO</option>
+                                <option value="WN">WN</option>
+                                <option value="XFER">XFER</option>
+                                <option value="All">All</option>
+                            </select>
                         </div>
 
+                        <div className="filter-field">
+                            <label htmlFor="disconnect_reason">Disconnect Reason</label>
+                            <select
+                                multiple
+                                id="disconnect_reason"
+                                name="disconnect_reason"
+                                value={filters.disconnect_reason}
+                                onChange={handleInputChange}
+                            >
+
+                                <option value="">Disconnect Reason</option>
+                                <option value="voicemail_reached">voicemail_reached</option>
+                                <option value="user_hangup">user_hangup</option>
+                                <option value="inactivity">inactivity</option>
+                                <option value="dial_no_answer">dial_no_answer</option>
+                                <option value="dial_failed">dial_failed</option>
+                                <option value="call_transfer">call_transfer</option>
+                                <option value="agent_hangup">agent_hangup</option>
+                            </select>
+                        </div>
                     </div>
                     <div className="filter-actions">
                         <button type="submit" className="submit-btn">Submit</button>
@@ -145,7 +167,7 @@ const RetellDidConnectedCall = () => {
                 </form>
             </div>
 
-            <div className="retellDIDCallReport-content">
+            <div className="retellAttemptCount-content">
                 {loading && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
                         <CircularProgress />
@@ -171,7 +193,7 @@ const RetellDidConnectedCall = () => {
                                     rowsPerPageOptions={[10, 20, 50]}
                                     checkboxSelection
                                     disableSelectionOnClick
-                                    getRowId={(row) => `${row._id}-${row.Human}-${row.Machine}${row.GrandTotal}`}
+                                    getRowId={(row) => `${row.createdAt}-${row.phone}-${row.attempbeforeXFER}`}
                                 />
                             </div>
                         </CardContent>
@@ -182,4 +204,4 @@ const RetellDidConnectedCall = () => {
     );
 };
 
-export default RetellDidConnectedCall;
+export default RetellAttemptCountForTransfer;

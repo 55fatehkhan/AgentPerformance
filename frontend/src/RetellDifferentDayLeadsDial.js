@@ -1,10 +1,10 @@
-import './RetellDIDConnects.css';
+import './RetellDifferentDayLeadsDial.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Card, CardContent, Button } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 
-const RetellDidConnectedCall = () => {
+const RetellDifferentDayLeadsDial = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -52,7 +52,7 @@ const RetellDidConnectedCall = () => {
         setIsSubmitted(true);
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellDIDConnectsRate`, {
+            const response = await fetch(`${process.env.REACT_APP_API_BACKEND}/api/RetellLeadsDialCountDateWise`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ const RetellDidConnectedCall = () => {
             const result = await response.json();
             setData(result);
         } catch (error) {
-            console.error('Error fetching Retell DID Connects Rate data:', error);
+            console.error('Error fetching Retell Leads Dial Count data:', error);
         } finally {
             setLoading(false);
         }
@@ -90,24 +90,22 @@ const RetellDidConnectedCall = () => {
         const blob = new Blob([csv], { type: 'text/csv' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.setAttribute('download', 'retellDIDconnects_data.csv');
+        link.setAttribute('download', 'retellLeadsDialCountDateWise_data.csv');
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
     const columns = [
-        { field: '_id', headerName: 'DID', width: 200 },
-        { field: 'Human', headerName: 'HumanCount', width: 150 },
-        { field: 'Machine', headerName: 'MachineCount', width: 150 },
-        { field: 'GrandTotal', headerName: 'GrandTotal', width: 150 },
-        { field: 'Human Answer%', headerName: 'Human Answer%', width: 150 },
+        { field: 'count', headerName: 'Count', width: 200 },
+        { field: 'date', headerName: 'Date', width: 150 },
+        { field: 'phone', headerName: 'Phone', width: 150 }
     ];
 
     return (
-        <div className="retellDIDCallReport-container">
-            <header className="retellDIDCallReport-header">
-                <h1>Retell DID Connects Rate Report</h1>
+        <div className="retellLeadsCount-container">
+            <header className="retellLeadsCount-header">
+                <h1>Retell- Leads Count Dial as per Different Date on same Day</h1>
                 <div className="user-info">
                     <button className="logout-btn" onClick={handleLogout}>Logout 🔒</button>
                 </div>
@@ -145,7 +143,7 @@ const RetellDidConnectedCall = () => {
                 </form>
             </div>
 
-            <div className="retellDIDCallReport-content">
+            <div className="retellLeadsCount-content">
                 {loading && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100px' }}>
                         <CircularProgress />
@@ -171,7 +169,7 @@ const RetellDidConnectedCall = () => {
                                     rowsPerPageOptions={[10, 20, 50]}
                                     checkboxSelection
                                     disableSelectionOnClick
-                                    getRowId={(row) => `${row._id}-${row.Human}-${row.Machine}${row.GrandTotal}`}
+                                    getRowId={(row) => `${row.count}-${row.date}-${row.phone}`}
                                 />
                             </div>
                         </CardContent>
@@ -182,4 +180,4 @@ const RetellDidConnectedCall = () => {
     );
 };
 
-export default RetellDidConnectedCall;
+export default RetellDifferentDayLeadsDial;

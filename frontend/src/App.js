@@ -16,6 +16,11 @@ import RetellDIDConnects from './RetellDIDConnects';
 import RetellCarrierConnects from './RetellCarrierConnects';
 import RetellHAPerAttempt from './RetellHAPerAttempt';
 import RetellCallCountOnEachLeads from './RetellCallCountOnEachLeads';
+import RetellDifferentDayLeadsDial from './RetellDifferentDayLeadsDial';
+import RetellAttemptCountForTransfer from './RetellAttemptCountForTransfer';
+import RetellTransferInEachAttempt from './RetellTransferInEachAttempt';
+import RetellHAperLineType from './RetellHAperLineType';
+
 
 
 function App() {
@@ -37,7 +42,11 @@ function App() {
                 <Route path="/RetellDIDConnects" element={<RetellDIDConnects />} /> 
                 <Route path="/RetellCarrierConnects" element={<RetellCarrierConnects />} /> 
                 <Route path="/RetellHAPerAttempt" element={<RetellHAPerAttempt />} />
-                <Route path="/RetellCallCountOnEachLeads" element={<RetellCallCountOnEachLeads />} /> 
+                <Route path="/RetellCallCountOnEachLeads" element={<RetellCallCountOnEachLeads />} />
+                <Route path="/RetellDifferentDayLeadsDial" element={<RetellDifferentDayLeadsDial />} /> 
+                <Route path="/RetellAttemptCountForTransfer" element={<RetellAttemptCountForTransfer />} />
+                <Route path="/RetellTransferInEachAttempt" element={<RetellTransferInEachAttempt />} /> 
+                <Route path="/RetellHAperLineType" element={<RetellHAperLineType />} /> 
             </Routes>
         </Router>
     );

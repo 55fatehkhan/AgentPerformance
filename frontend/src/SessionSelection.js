@@ -59,6 +59,23 @@ const SessionSelection = () => {
     const goToRetellCallCountEachLeads = () => {
         navigate('/RetellCallCountOnEachLeads'); 
     };
+    const goToRetellLeadsDifferentDateDial = () => {
+        navigate('/RetellDifferentDayLeadsDial'); 
+    };
+    const goToRetellAttemptCountForTransfer = () => {
+        navigate('/RetellAttemptCountForTransfer'); 
+    };
+    const goToRetellTransferInEachAttempt = () => {
+        navigate('/RetellTransferInEachAttempt'); 
+    };
+    const goToRetellHAperLineType = () => {
+        navigate('/RetellHAperLineType'); 
+    };
+
+
+
+
+
 
 
 
@@ -174,6 +191,30 @@ const SessionSelection = () => {
                     <div className="card" onClick={goToRetellCallCountEachLeads}>
                         <h2>Each number attempt count per day</h2>
                         <p>Retell- Each number attempt count per day and timestamp with other details</p>
+                    </div>
+                )}
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellLeadsDifferentDateDial}>
+                        <h2>Leads Dialed of different days</h2>
+                        <p>Retell- Each day we dialed the leads of same day and also the older days, from this report we can get the count of leads which belongs which date</p>
+                    </div>
+                )}
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellAttemptCountForTransfer}>
+                        <h2>Attempt Count for transfer</h2>
+                        <p>Retell- By this, we can see how many attempt goes for make that transfer and that lead belong from which date</p>
+                    </div>
+                )}
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellTransferInEachAttempt}>
+                        <h2>Transfer per attempt wise</h2>
+                        <p>Retell- We can see, in each attempt how many transfer we get, date wise</p>
+                    </div>
+                )}
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellHAperLineType}>
+                        <h2>Human Answer Per LineType</h2>
+                        <p>Retell- We can see how much Human answer/performance we are getting as per classified by Line Type</p>
                     </div>
                 )}
 
