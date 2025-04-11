@@ -527,7 +527,7 @@ app.post('/api/RetellCarrierConnectsRate', async (req, res) => {
                 subId: 1,
                 source: 1,
                 campaign: 1,
-                carrier: "$ipqs.resonseBody.carrier",
+                carrier: "$ipqs.responseBody.carrier",
                 did: 1,
                 _id: 0
             }
@@ -678,7 +678,7 @@ app.post('/api/RetellHAPerAttemptCount', async (req, res) => {
                 subId: 1,
                 source: 1,
                 campaign: 1,
-                carrier: "$ipqs.resonseBody.carrier",
+                carrier: "$ipqs.responseBody.carrier",
                 did: 1,
                 _id: 0
             }
@@ -1237,8 +1237,8 @@ app.post('/api/RetellHAperLineType', async (req, res) => {
                 source: 1,
                 campaign: 1,
                 did: 1,
-                carrier: "$ipqs.resonseBody.carrier",
-                LineType: "$ipqs.resonseBody.line_type",
+                carrier: "$ipqs.responseBody.carrier",
+                LineType: "$ipqs.responseBody.line_type",
                 _id: 0
             }
         },
