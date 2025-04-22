@@ -1150,6 +1150,102 @@ app.post('/api/RetellTransferInEachAttempt', async (req, res) => {
 });
 
 
+// Twillio Recordings
+app.post('/api/twilioRecording', async (req, res) => {
+    const { phone } = req.body;  
+
+    let matchConditions = {
+        phone: parseInt(phone)  // Convert phone number to integer for comparison if needed
+    };
+
+    const pipeline = [
+        {
+            $match: matchConditions
+        },
+        {
+            $project: {
+                phone: 1,
+                retellCallAnalysedLogs: {
+                    $arrayElemAt: [
+                        { $reverseArray: "$retellCallAnalysedLogs" }, 0
+                    ]
+                }
+            }
+        },
+        {
+            $project: {
+                twilioCallSid: "$retellCallAnalysedLogs.twilioCallSid"
+            }
+        },
+        {
+            $lookup: {
+                from: "twiliologs",  
+                localField: "twilioCallSid", 
+                foreignField: "twilioCallSid",  
+                as: "twilioData"
+            }
+        },
+        {
+            $unwind: "$twilioData"
+        },
+        {
+            $project: {
+                twilioRecordingUrl: {
+                    $replaceOne: {
+                        input: "$twilioData.twilioRecordingUrl",
+                        find: "TWILIO-ACCOUNT-SID",
+                        replacement: process.env.TWILIO_ACCOUNT_SID  // Use SID from .env
+                    }
+                }
+            }
+        }
+    ];
+
+    // console.log("Pipeline: ", pipeline);
+    try {
+        // Run the aggregation to get the twilioRecordingUrl
+        const results = await Realtimelead.aggregate(pipeline);
+
+        // Check if results are available
+        if (results.length > 0) {
+            const twilioRecordingUrl = results[0].twilioRecordingUrl;
+
+            // Now, let's authenticate with Twilio and fetch the recording info
+            const Username = process.env.TWILIO_USERNAME;
+            const Password = process.env.TWILIO_PASSWORD;
+            
+            // Making the request to Twilio with the recording URL using fetch
+            const response = await fetch(twilioRecordingUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Basic ' + Buffer.from(`${Username}:${Password}`).toString('base64')
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch Twilio recording details');
+            }
+
+            // Parse the JSON response from Twilio
+            const data = await response.json();
+
+            // Extract the media_url from the response
+            const mediaUrl = data.media_url;
+
+            // Return the media_url to the frontend
+            res.status(200).json({ mediaUrl });
+
+        } else {
+            res.status(404).json({ error: "No matching record found" });
+        }
+    } catch (error) {
+        console.error('Error running aggregation or Twilio request:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
+
 // Human Answer HA by LineType
 app.post('/api/RetellHAperLineType', async (req, res) => {
     const { fromDate, toDate } = req.body;
@@ -1447,7 +1543,8 @@ const realtimeleadSchema = new mongoose.Schema({
     state: String,
     zip: String,
     email: String,
-    phone: String
+    phone: Number,
+    postToClient: { type: Boolean, default: false } // Add postToClient field
 });
 
 // Create the model
@@ -1511,7 +1608,6 @@ app.get('/search-by-phone', async (req, res) => {
 });
 
 
-
 //POST to CLIENT method, leads posting for Retell RealTime Leads by Carlos
 app.post('/post-to-client', async (req, res) => {
     try {
@@ -1521,6 +1617,14 @@ app.post('/post-to-client', async (req, res) => {
             return res.status(400).json({ success: false, message: 'All fields are required' });
         }
        // console.log(firstName, lastName, phone, email);
+
+       const numericPhone = parseInt(phone, 10);  // Convert phone string to number
+        if (isNaN(numericPhone)) {
+            console.error("Invalid phone number, cannot convert to number");
+            return null;
+        }
+
+       // console.log("Nubmer format check: ", numericPhone);
 
         // Construct API URL https://choicehomewarranty.com
         let url = `https://choicehomewarranty.com/host-post.php?NETWORKID=sclPT&AFID=blindxfer&FirstName=${encodeURIComponent(firstName)}&LastName=${encodeURIComponent(lastName)}&Address=${encodeURIComponent(address)}&City=${encodeURIComponent(city)}&State=${encodeURIComponent(state)}&PostalCode=${encodeURIComponent(postalCode)}&Phone=${encodeURIComponent(phone)}&Email=${encodeURIComponent(email)}&IPAddress=208.109.184.203&_OwnHome=Yes&_optin=Yes&Team=b`;
@@ -1537,6 +1641,24 @@ app.post('/post-to-client', async (req, res) => {
         const responseData = await response.text(); // Get API response as text
         console.log("Response from client API while posting: ",responseData );
 
+        // Check if response is successful (200)
+        if (response.ok) {
+            // Update postToClient field in the Realtimeleads collection
+            const lead = await Realtimeleadd.findOneAndUpdate(
+                { phone: numericPhone }, // Find the lead by phone
+                { postToClient: true }, // Set postToClient to true
+                { new: true } // Return the updated document
+            );
+
+            if (lead) {
+                console.log(`Successfully updated postToClient to true for phone: ${phone}`);
+            } else {
+                console.error('Lead not found in the database');
+            }
+        } else {
+            console.error('Failed to post data to client');
+        }
+
         return res.status(200).json({ success: true, message: 'Data posted successfully', data: responseData });
 
     } catch (error) {
@@ -1544,6 +1666,14 @@ app.post('/post-to-client', async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error' });
     }
 });
+
+//         return res.status(200).json({ success: true, message: 'Data posted successfully', data: responseData });
+
+//     } catch (error) {
+//         console.error('Error posting to client:', error);
+//         return res.status(500).json({ success: false, message: 'Internal server error' });
+//     }
+// });
 
 
 // clientReport
@@ -1852,8 +1982,6 @@ app.post('/api/threewayreports', async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
-
-
 
 
 //AGENT PERFORMANCE

@@ -71,13 +71,9 @@ const SessionSelection = () => {
     const goToRetellHAperLineType = () => {
         navigate('/RetellHAperLineType'); 
     };
-
-
-
-
-
-
-
+    const goToTwillioRecordings = () => {
+        navigate('/TwillioRecordings'); 
+    };
 
 
     return (
@@ -215,6 +211,12 @@ const SessionSelection = () => {
                     <div className="card" onClick={goToRetellHAperLineType}>
                         <h2>Human Answer Per LineType</h2>
                         <p>Retell- We can see how much Human answer/performance we are getting as per classified by Line Type</p>
+                    </div>
+                )}
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToTwillioRecordings}>
+                        <h2>Twillio Recordings</h2>
+                        <p>Listen the full recording of calls, especially for transfer/paid</p>
                     </div>
                 )}
 

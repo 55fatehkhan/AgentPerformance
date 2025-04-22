@@ -20,7 +20,7 @@ import RetellDifferentDayLeadsDial from './RetellDifferentDayLeadsDial';
 import RetellAttemptCountForTransfer from './RetellAttemptCountForTransfer';
 import RetellTransferInEachAttempt from './RetellTransferInEachAttempt';
 import RetellHAperLineType from './RetellHAperLineType';
-
+import TwillioRecordings from './TwillioRecordings';
 
 
 function App() {
@@ -47,6 +47,7 @@ function App() {
                 <Route path="/RetellAttemptCountForTransfer" element={<RetellAttemptCountForTransfer />} />
                 <Route path="/RetellTransferInEachAttempt" element={<RetellTransferInEachAttempt />} /> 
                 <Route path="/RetellHAperLineType" element={<RetellHAperLineType />} /> 
+                <Route path="/TwillioRecordings" element={<TwillioRecordings />} /> 
             </Routes>
         </Router>
     );
