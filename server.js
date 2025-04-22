@@ -1205,6 +1205,7 @@ app.post('/api/twilioRecording', async (req, res) => {
     try {
         // Run the aggregation to get the twilioRecordingUrl
         const results = await Realtimelead.aggregate(pipeline);
+         console.log("TwillioPiplelineResult", results);
 
         // Check if results are available
         if (results.length > 0) {
@@ -1213,6 +1214,8 @@ app.post('/api/twilioRecording', async (req, res) => {
             // Now, let's authenticate with Twilio and fetch the recording info
             const Username = process.env.TWILIO_USERNAME;
             const Password = process.env.TWILIO_PASSWORD;
+
+            console.log("TwillioRecoridngFromDb: ", twilioRecordingUrl);
             
             // Making the request to Twilio with the recording URL using fetch
             const response = await fetch(twilioRecordingUrl, {
