@@ -74,6 +74,9 @@ const SessionSelection = () => {
     const goToTwillioRecordings = () => {
         navigate('/TwillioRecordings'); 
     };
+    const goToRetellInbound = () => {
+        navigate('/RetellInbound'); 
+    };
 
 
     return (
@@ -154,8 +157,15 @@ const SessionSelection = () => {
 
                 {(role === 'adminretell' && centerName === 'both') && (
                     <div className="card" onClick={goToRetellCallLogs}>
-                        <h2>Retell Call logs Analysis</h2>
+                        <h2>Retell Call Analysis</h2>
                         <p>We can get here every sort of detail of dialing from Retell as per requirement, either cost, HA, Disconnection reason, Latency, etc</p>
+                    </div>
+                )}
+
+                {(role === 'adminretell' && centerName === 'both') && (
+                    <div className="card" onClick={goToRetellInbound}>
+                        <h2>Retell Inbound Calls</h2>
+                        <p>We can get here, Inbound calling report, transfer from that, cost, and other details.</p>
                     </div>
                 )}
 

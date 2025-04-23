@@ -21,6 +21,7 @@ import RetellAttemptCountForTransfer from './RetellAttemptCountForTransfer';
 import RetellTransferInEachAttempt from './RetellTransferInEachAttempt';
 import RetellHAperLineType from './RetellHAperLineType';
 import TwillioRecordings from './TwillioRecordings';
+import RetellInbound from './RetellInbound';
 
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
                 <Route path="/RetellTransferInEachAttempt" element={<RetellTransferInEachAttempt />} /> 
                 <Route path="/RetellHAperLineType" element={<RetellHAperLineType />} /> 
                 <Route path="/TwillioRecordings" element={<TwillioRecordings />} /> 
+                <Route path="/RetellInbound" element={<RetellInbound />} /> 
             </Routes>
         </Router>
     );

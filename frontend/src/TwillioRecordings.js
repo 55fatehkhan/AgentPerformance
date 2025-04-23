@@ -37,6 +37,7 @@ const TwilioRecording = () => {
         }
     };
 
+   
     return (
         <div className="twilioRecording-container">
             <header className="twilioRecording-header">
@@ -73,6 +74,17 @@ const TwilioRecording = () => {
                     <div className="recording-result">
                         <h3>Recording Data:</h3>
                         <pre>{JSON.stringify(recordingData, null, 2)}</pre>
+
+                        {/* Displaying the clickable link */}
+                        {recordingData.mediaUrl && (
+                            <div>
+                                <Typography variant="body1" component="p">
+                                    <a href={recordingData.mediaUrl} target="_blank" rel="noopener noreferrer">
+                                        Click here to listen to the recording
+                                    </a>
+                                </Typography>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

@@ -118,6 +118,12 @@ const retellcall = new mongoose.Schema({
 
 const Realtimelead = mongoose.model('realtimelead', retellcall);
 
+// for inbound - in transcriptions collection
+const retellInboundcall = new mongoose.Schema({
+    date: { type: Date, required: true }
+});
+const InboundLeads = mongoose.model('transcription', retellInboundcall);
+
 // Function to get campaign IDs based on center name, provider, and campaign type
 const getCampaignIds = (center, provider, campaign) => {
     if (center === 'Shark') {
@@ -1190,13 +1196,7 @@ app.post('/api/twilioRecording', async (req, res) => {
         },
         {
             $project: {
-                twilioRecordingUrl: {
-                    $replaceOne: {
-                        input: "$twilioData.twilioRecordingUrl",
-                        find: "TWILIO-ACCOUNT-SID",
-                        replacement: process.env.TWILIO_ACCOUNT_SID  // Use SID from .env
-                    }
-                }
+                twilioRecordingUrl: "$twilioData.twilioRecordingUrl" 
             }
         }
     ];
@@ -1205,20 +1205,26 @@ app.post('/api/twilioRecording', async (req, res) => {
     try {
         // Run the aggregation to get the twilioRecordingUrl
         const results = await Realtimelead.aggregate(pipeline);
-         console.log("TwillioPiplelineResult", results);
+        // console.log("TwillioPiplelineResult", results);
 
         // Check if results are available
         if (results.length > 0) {
             const twilioRecordingUrl = results[0].twilioRecordingUrl;
 
+            // Safely replace the TWILIO_ACCOUNT_SID here, outside of the pipeline
+        const twilioRecordingUrlWithSid = twilioRecordingUrl.replace(
+            'TWILIO-ACCOUNT-SID', 
+            process.env.TWILIO_ACCOUNT_SID
+        );
+
             // Now, let's authenticate with Twilio and fetch the recording info
             const Username = process.env.TWILIO_USERNAME;
             const Password = process.env.TWILIO_PASSWORD;
 
-            console.log("TwillioRecoridngFromDb: ", twilioRecordingUrl);
+           // console.log("TwillioRecoridngFinal: ", twilioRecordingUrlWithSid);
             
             // Making the request to Twilio with the recording URL using fetch
-            const response = await fetch(twilioRecordingUrl, {
+            const response = await fetch(twilioRecordingUrlWithSid, {
                 method: 'GET',
                 headers: {
                     'Authorization': 'Basic ' + Buffer.from(`${Username}:${Password}`).toString('base64')
@@ -1247,6 +1253,142 @@ app.post('/api/twilioRecording', async (req, res) => {
     }
 });
 
+//Retell Inbound calls
+app.post('/api/RetellInboundCalls', async (req, res) => {
+    const { fromDate, toDate } = req.body;
+
+    // Construct dynamic date matching condition based on user input
+    let dateMatchCondition = {
+        createdAt: {
+            $gte: fromDate ? new Date(fromDate + "T11:30:00Z") : new Date('1970-01-01T11:30:00Z'),
+            $lte: toDate ? new Date(toDate + "T11:30:00Z") : new Date()
+        },
+        "body.event": "call_analyzed", 
+        "body.call.direction": "inbound"
+    };
+
+    console.log("Matchedconditon: ", dateMatchCondition);
+
+    // MongoDB aggregation pipeline
+    const pipeline = [
+        {
+            $sort: {
+               _id: -1
+            }
+        },
+        {
+            $addFields: {
+                dialedAt: {
+                    $toDate: "$retellDialedLogs.createdAt"
+                }
+            }
+        },
+        {
+            $match: dateMatchCondition
+        },
+        {
+            $lookup: {
+                from: "twiliologs",
+                localField: "body.call.telephony_identifier.twilio_call_sid",
+                foreignField: "twilioCallSid",
+                as: "twilio"
+            }
+        },
+        {
+            $unwind: {
+                    path: "$twilio",
+                    preserveNullAndEmptyArrays: false
+            }
+        },
+        {
+            $project: {
+                from: {
+                    $ifNull: ["$body.call.from_number", ""]
+                  },
+                  to: {
+                    $ifNull: ["$body.call.to_number", ""]
+                  },
+                  direction: {
+                    $ifNull: ["$body.call.direction", ""]
+                  },
+                  retell_duration_seconds: {
+                    $round: [
+                      {
+                        $ifNull: [
+                          {
+                            $divide: [
+                              "$body.call.duration_ms",
+                              1000
+                            ]
+                          },
+                          0
+                        ]
+                      },
+                      0
+                    ]
+                  },
+                  recording_url: {
+                    $ifNull: ["$twilio.twilioRecordingUrl", ""]
+                  },
+                  disconnect_reason: {
+                    $ifNull: [
+                      "$body.call.disconnection_reason",
+                      ""
+                    ]
+                  },
+                  retell_call_cost: {
+                    $divide: [
+                      "$body.call.call_cost.combined_cost",
+                      100
+                    ]
+                  },
+                  call_disposition:
+                    "$body.call.call_analysis.custom_analysis_data.call_disposition",
+                  retell_call_id: "$body.call.call_id",
+                  latency: "$body.call.latency.e2e.p50",
+                  totalCost: {
+                    $add: [
+                      "$body.call.call_cost.combined_cost",
+                      "$twilio.twilioCallCost",
+                      "$twilio.twilioRecordingCost"
+                    ]
+                  },
+                  createdAtSimple: 1,
+                  twilioCallDuration:
+                    "$twilio.twilioRecordingDuration",
+                  twilioCallDurationWithRing:
+                    "$twilio.twilioCallDuration",
+                  // dial_index: 1,
+                  // subId: 1,
+                  // source: 1,
+                  // campaign: 1,
+                  // did: 1,
+                  _id: 0,
+                  createdAt: 1
+             
+            }
+        },
+        {
+            $addFields:  {
+                durationPostTransfer: {
+                $subtract: [
+                "$retell_duration_seconds",
+                "$twilioCallDurationWithRing"
+                ]
+                }
+            }
+        }
+    ];
+
+    try {
+        const results = await InboundLeads.aggregate(pipeline);
+       // console.log(results);
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error running aggregation:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 
 // Human Answer HA by LineType
