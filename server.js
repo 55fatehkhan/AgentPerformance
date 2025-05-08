@@ -152,7 +152,7 @@ const getCampaignIds = (center, provider, campaign) => {
 
 // Retell Call logs Report API
 app.post('/api/RetellCallLogs', async (req, res) => {
-    const { direction, duration, fromDate, toDate, call_disposition, disconnect_reason } = req.body;
+    const { direction, duration, fromDate, toDate, call_disposition, disconnect_reason , vendor, type} = req.body;
   //  console.log(direction, duration, fromDate, toDate, call_disposition, disconnect_reason);
 
     // Helper function to ensure all inputs are arrays where necessary
@@ -164,9 +164,12 @@ app.post('/api/RetellCallLogs', async (req, res) => {
             $gte: fromDate ? new Date(fromDate + "T11:30:00Z") : new Date('1970-01-01T11:30:00Z'),
             $lte: toDate ? new Date(toDate + "T11:30:00Z") : new Date()
         },
+        vendor: {$in: ensureArray(vendor)|| [ 'shift44', 'shift44homeowners', 'shift44offhours' ] },
+        type:   {$in: ensureArray(type) || ["rtlOffHours", "rtlHomeowners", "rtl"]},
         "retellCallAnalysedLogs.direction": { $in: ensureArray(direction) || ["inbound", "outbound"] }
     };
 
+    console.log("MatchedCondition1  ", matchConditions1);
     let matchConditions2 = {
         duration_second: { $gte: Number(duration) || 0 }
     };
@@ -209,7 +212,9 @@ app.post('/api/RetellCallLogs', async (req, res) => {
             call_disposition: "$retellCallAnalysedLogs.call_analysis.custom_analysis_data.call_disposition",
             //call_id: "$retellCallAnalysedLogs.call_id",
             latency: "$retellCallAnalysedLogs.latency.e2e.p50",
-            LeadsGetsDateTime: 1
+            LeadsGetsDateTime: 1,
+            vendor: 1,
+            type: 1
         }}
     ];
 
@@ -1369,6 +1374,20 @@ app.post('/api/RetellInboundCalls', async (req, res) => {
             }
         },
         {
+            $addFields: {
+                from: {
+                    $toLong: {
+                    $substr: ["$from", 2, 10]
+                    }
+                },
+                to: {
+                    $toLong: {
+                    $substr: ["$to", 2, 10]
+                    }
+                }
+            }
+        },
+        {
             $addFields:  {
                 durationPostTransfer: {
                 $subtract: [
@@ -1377,6 +1396,38 @@ app.post('/api/RetellInboundCalls', async (req, res) => {
                 ]
                 }
             }
+        },
+        {
+            $lookup: {
+                from: "realtimeleads",
+                localField: "from",
+                foreignField: "phone",
+                as: "lead_info"
+            }
+        },
+        {
+            $unwind: {
+                path: "$lead_info",
+                preserveNullAndEmptyArrays: true
+              }
+        },
+        {
+            $addFields: {
+                type: "$lead_info.type",
+                vendor: "$lead_info.vendor"
+              }
+        },
+        {
+            $project: {
+                lead_info: 0
+              }
+        },
+        {
+            $match: {
+                type: {
+                  $exists: 1
+                }
+              }
         }
     ];
 

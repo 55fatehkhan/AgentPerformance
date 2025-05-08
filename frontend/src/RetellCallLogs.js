@@ -17,7 +17,9 @@ const RetellCallLogs = () => {
         call_disposition: '',
         disconnect_reason: '',
         fromDate: '',
-        toDate: ''
+        toDate: '',
+        type: '',
+        vendor: ''
     });
 
     const Loggedin_centerName = sessionStorage.getItem('centerName');
@@ -103,7 +105,9 @@ const RetellCallLogs = () => {
             call_disposition: [],
             disconnect_reason: [],
             fromDate: '',
-            toDate: ''
+            toDate: '',
+            type: [],
+            vendor: []
         });
         setData([]);
         setIsSubmitted(false);
@@ -140,6 +144,8 @@ const RetellCallLogs = () => {
         { field: 'call_disposition', headerName: 'Disposition', width: 150 },
         { field: 'LeadsGetsDateTime', headerName: 'LeadsGetsDateTime', width: 150 },
         { field: 'latency', headerName: 'Latency', width: 150 },
+        { field: 'vendor', headerName: 'Vendor', width: 150 },
+        { field: 'type', headerName: 'type', width: 150 },
     ];
 
     return (
@@ -176,6 +182,41 @@ const RetellCallLogs = () => {
                         </div>
 
                         <div className="filter-field">
+                            <label htmlFor="vendor">Vendor</label>
+                            <select
+                                multiple
+                                id="vendor"
+                                name="vendor"
+                                value={filters.vendor}
+                                onChange={handleInputChange}
+                            >
+                                <option value="">Select Vendor</option>
+                                <option value="shift44">shift44</option>
+                                <option value="shift44homeowners">shift44homeowners</option>
+                                <option value="shift44offhours">shift44offhours</option>
+                            
+                            </select>
+                        </div>
+
+
+                        <div className="filter-field">
+                            <label htmlFor="type">Type</label>
+                            <select
+                                multiple
+                                id="type"
+                                name="type"
+                                value={filters.type}
+                                onChange={handleInputChange}
+                            >
+                                <option value="">Select Type</option>
+                                <option value="rtl">RTL</option>
+                                <option value="rtlHomeowners">RTLHomeowners</option>
+                                <option value="rtlOffHours">RTLOffHours</option>
+                            
+                            </select>
+                        </div>
+
+                        <div className="filter-field">
                             <label htmlFor="direction">Direction</label>
                             <select
                                 multiple
@@ -207,6 +248,7 @@ const RetellCallLogs = () => {
                                 <option value="CALLBK">CALLBK</option>
                                 <option value="DNC">DNC</option>
                                 <option value="HU">HU</option>
+                                <option value="NI">NI</option>
                                 <option value="NA">NA</option>
                                 <option value="NHO">NHO</option>
                                 <option value="WN">WN</option>

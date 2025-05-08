@@ -110,6 +110,8 @@ const RetellInbound = () => {
         { field: 'twilioCallDuration', headerName: 'TwilioCallDuration', width: 150 },
         { field: 'twilioCallDurationWithRing', headerName: 'TwilioCallDurationWithRing', width: 150 },
         { field: 'durationPostTransfer', headerName: 'DurationPostTransfer', width: 150 },
+        { field: 'vendor', headerName: 'Vendor', width: 150 },
+        { field: 'type', headerName: 'LeadType', width: 150 }
     ];
 
     return (
