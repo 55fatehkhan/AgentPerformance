@@ -194,6 +194,7 @@ const RetellCallLogs = () => {
                                 <option value="shift44">shift44</option>
                                 <option value="shift44homeowners">shift44homeowners</option>
                                 <option value="shift44offhours">shift44offhours</option>
+                                <option value="shift44weekends">shift44weekends</option>
                             
                             </select>
                         </div>
@@ -212,6 +213,7 @@ const RetellCallLogs = () => {
                                 <option value="rtl">RTL</option>
                                 <option value="rtlHomeowners">RTLHomeowners</option>
                                 <option value="rtlOffHours">RTLOffHours</option>
+                                <option value="rtlWeekends">RTLWeekends</option>
                             
                             </select>
                         </div>
