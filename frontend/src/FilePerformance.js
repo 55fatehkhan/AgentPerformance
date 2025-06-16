@@ -39,7 +39,8 @@ const FilePerformance = () => {
         center: '',
         dialer: '',
         datatype: '',
-        campaign: ''
+        campaign: '',
+         listId: [], // initialize as array
     });
 
     const Loggedin_centerName = sessionStorage.getItem('centerName');
@@ -220,31 +221,38 @@ const FilePerformance = () => {
                     </select>
                 </div>
                 {/* Adding ListId Filter */}
-                <div className="filter-field">
-                    <label htmlFor="listId">List ID:</label>
-                    <select
-                        name="listId"
-                        id="listId"
-                        value={filters.listId}
-                        onChange={handleChange}
-                    >
-                        <option value="">List ID</option>
-                        <option value="Jared1">Jared1</option>
-                        <option value="Jared2">Jared2</option>
-                        <option value="Jared3">Jared3</option>
-                        <option value="Jared4">Jared4</option>
-                        <option value="Jared5">Jared5</option>
-                        <option value="Jared6">Jared6</option>
-                        <option value="Jared7">Jared7</option>
-                        <option value="Jared8">Jared8</option>
-                        <option value="Jared9">Jared9</option>
-                        <option value="IQAutoInsurance">IQAutoInsurance</option>
-                        <option value="ReverseMortgage">ReverseMortgage</option>
-                        {/* <option value="AllJared">All Jared</option> */}
-                        <option value="Danish">Danish</option>
-                        {/* <option value="AutoInsuranceGold">AutoInsuranceGold</option> */}
-                    </select>
-                </div>
+<div className="filter-field">
+    <label htmlFor="listId">List ID:</label>
+    <select
+        name="listId"
+        id="listId"
+        multiple
+        value={filters.listId}
+        onChange={(e) => {
+            const selected = Array.from(e.target.selectedOptions, option => option.value);
+            setFilters({ ...filters, listId: selected });
+        }}
+        style={{ height: '100px' }} // optional for better visibility
+    >
+        <option value="Jared1">Jared1</option>
+        <option value="Jared2">Jared2</option>
+        <option value="Jared3">Jared3</option>
+        <option value="Jared4">Jared4</option>
+        <option value="Jared5">Jared5</option>
+        <option value="Jared6">Jared6</option>
+        <option value="Jared7">Jared7</option>
+        <option value="Jared8">Jared8</option>
+        <option value="Jared9">Jared9</option>
+        <option value="Jared10">Jared10</option>
+        <option value="Jared11">Jared11</option>
+        <option value="AutoInsurance_Gold">AutoInsurance_Gold</option>
+        <option value="AutoWarrantyGold">AutoWarrantyGold</option>
+        <option value="IQAutoInsurance">IQAutoInsurance</option>
+        <option value="ReverseMortgage">ReverseMortgage</option>
+        <option value="Danish">Danish</option>
+    </select>
+</div>
+
                 {/* Adding File Number Filter */}
                 {/* <div className="filter-field">
                     <label htmlFor="fileNumber">File Number:</label>
