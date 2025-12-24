@@ -154,7 +154,7 @@ module.exports = function registerPostToClientJob(Realtimelead) {
   // Day of week: 0=Sunday, 1=Monday, ..., 5=Friday, 6=Saturday
   // "1-5" means Monday through Friday
 
-  cron.schedule("0 18 * * 1-5", runPostToClientJob, {
+  cron.schedule("* * * * 1-5", runPostToClientJob, {
     timezone: "America/New_York",
   });
 };
