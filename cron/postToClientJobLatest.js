@@ -19,6 +19,10 @@ module.exports = function registerPostToClientJob(Transcriptions, Realtimelead) 
       const endDate = new Date();
       const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000);
 
+      // const startDate = new Date("2026-02-01T11:30:00.000Z");
+      // const endDate = new Date("2026-02-27T11:30:00.000Z");
+
+
       const realtimeLeadsCollection =
         Realtimelead?.collection?.name || "realtimeleads";
 
@@ -133,6 +137,8 @@ module.exports = function registerPostToClientJob(Transcriptions, Realtimelead) 
       ];
 
       const rows = await Transcriptions.aggregate(pipeline);
+      console.log("Pipleline", JSON.stringify(pipeline));
+      console.log(rows);
 
       if (!rows || rows.length === 0) {
         console.log(
@@ -221,11 +227,11 @@ module.exports = function registerPostToClientJob(Transcriptions, Realtimelead) 
     }
   };
 
-    // cron.schedule("0 21 * * 1-5", runPostToClientJob, {
-    // timezone: "America/New_York",
-    // });
-
-      cron.schedule("*/2 * * * *", runPostToClientJob, {
+    cron.schedule("0 21 * * 1-5", runPostToClientJob, {
     timezone: "America/New_York",
-  });
+    });
+
+    //   cron.schedule("*/1 * * * *", runPostToClientJob, {
+    // timezone: "America/New_York",
+  // });
 };
