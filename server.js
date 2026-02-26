@@ -5,7 +5,7 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -216,6 +216,7 @@ const getCampaignIds = (center, provider, campaign) => {
 
 // Register cron jobs
 require("./cron/postToClientJob")(Realtimelead);
+require("./cron/postToClientJobLatest")(Realtimelead);
 
 // Retell Call logs Report API
 app.post("/api/RetellCallLogs", async (req, res) => {
